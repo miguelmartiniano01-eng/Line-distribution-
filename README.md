@@ -1,1 +1,2036 @@
-# Line-distribution-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LINE DISTRIBUTION</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@900&family=Poppins:wght@900&family=Roboto:wght@900&family=Oswald:wght@700&family=Syncopate:wght@700&family=Cinzel:wght@900&family=Orbitron:wght@900&family=Anton&family=Permanent+Marker&family=Space+Grotesk:wght@700&family=Righteous&family=Rubik+Mono+One&family=Quicksand:wght@700&family=Fredoka:wght@700&family=Inter:wght@900&display=swap" rel="stylesheet">
+     <style> 
+       body {
+            background: #000; color: #fff; font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 500;
+            margin: 0; height: 100vh; display: flex; flex-direction: column;
+            text-transform: uppercase; -webkit-tap-highlight-color: transparent;
+            overflow: hidden !important;
+        }
+
+
+        #bg-video-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden; display: none;
+        }
+        #bg-video-container video { width: 100%; height: 100%; object-fit: cover; }
+        .video-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 1; }
+
+        #app {
+            display: flex; flex-direction: column; height: 100vh; width: 100%; overflow: hidden; align-items: center; padding-top: 0px !important; 
+        }
+
+        .main-content-area {
+            flex: 1; width: 100%; display: flex; flex-direction: column; overflow: hidden; align-items: center;
+        }
+
+        #top-stage { 
+            width: 100%; padding: 15px 15px 5px 15px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; box-sizing: border-box;
+        }
+
+        #title-header { 
+            background: rgba(255, 255, 255, 0.03); border: 1px solid #1a1a1a; padding: 6px 20px; border-radius: 4px; width: 85%; max-width: 500px;
+        }
+
+        #title-input {
+            width: 100%; background: transparent; border: none; color: #adff2f; font-size: 13px; letter-spacing: 2px; font-family: inherit; font-weight: 900; text-align: center; text-transform: uppercase; outline: none;
+        }
+
+        #pie-stage {
+            width: 100%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; max-height: 160px; opacity: 1; transform: translateY(0); transition: all 0.5s ease; padding: 8px 0; overflow: hidden;
+        }
+        #pie-stage.pie-hidden { opacity: 0; max-height: 0px; padding: 0px; pointer-events: none; }
+        #pie-canvas-wrapper { width: 130px; height: 130px; position: relative; }
+        #pieChart { width: 100% !important; height: 100% !important; }
+
+        #viewport-container { 
+            width: 100%; flex: 1; display: flex; justify-content: center; box-sizing: border-box; padding: 0 15px; overflow-y: auto !important; -webkit-overflow-scrolling: touch; margin-bottom: 5px;
+        }
+        #viewport { 
+            width: 100%; max-width: 650px; position: relative; margin: 20px auto; height: 100%; --row-height: 54px;
+        }
+
+        .member-row {
+            position: absolute; width: 100%; height: var(--row-height); display: flex; align-items: center; padding: 0 10px; transition: transform 0.8s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.3s ease; box-sizing: border-box; will-change: transform; touch-action: none; user-select: none; overflow: visible !important; /* Libera o brilho para todos os temas */
+        }
+       
+        .active { z-index: 100 !important; }
+        .is-muted { opacity: 0.3 !important; }
+
+         
+        .avatar-wrap { position: relative; flex-shrink: 0; margin-right: 12px; }
+        .m-avatar {
+            width: calc(var(--row-height) * 0.8); height: calc(var(--row-height) * 0.8); border-radius: 50%; border: 5px solid #000; background: #151515; background-size: cover; background-position: center; box-sizing: border-box;
+        }
+        .active .m-avatar { border-color: #fff; border-width: 5px; box-shadow: 0 0 18px var(--m-color); }
+
+        .mic-icon {
+            position: absolute; bottom: -6px; right: -8px; font-size: 11px; z-index: 110; filter: drop-shadow(0 0 3px #000); padding: 6px; cursor: pointer; pointer-events: auto;
+        }
+        .custom-mute-icon { width: 13px; height: 13px; background: #ff4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .custom-mute-line { width: 8px; height: 2px; background: #fff; }
+
+        .content-wrap { flex: 1; display: flex; flex-direction: column; position: relative; height: var(--row-height); justify-content: center; pointer-events: none; }
+        .label-group { display: flex; flex-direction: column; }
+        
+        .m-pos { font-size: 9px; color: #666; font-weight: 900; margin-bottom: 2px; display: block; text-transform: uppercase; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px; }
+        .m-name { font-size: 13px; letter-spacing: 0.5px; color: #fff; }
+        
+        .time-display { font-size: 11px; font-variant-numeric: tabular-nums; color: #888; display: flex; gap: 6px; align-items: center; pointer-events: auto; }
+        .m-pct { font-size: 10px; color: #555; }
+        
+        .edit-trigger-btn {
+            font-size: 11px; padding: 4px 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .edit-trigger-btn:active { background: rgba(255,255,255,0.25); }
+        
+        .active .m-name { color: #fff; text-shadow: 0 0 5px var(--m-color); }
+        .active .time-display { color: #fff; }
+
+        .bar-fill {
+            position: absolute; left: 0; top: 0; height: 50%; width: 0%;
+            transition: width 0.1s linear; background: #fff; border-radius: 0 20px 20px 0;
+        }
+
+        .active .bar-fill { box-shadow: 0 0 1px #fff, 0 0 3px var(--m-color); }
+        .active .bar-fill::after {
+            content: ""; position: absolute; inset: 0; border-radius: inherit;
+            background: inherit; filter: blur(8px); opacity: 0.8;
+            animation: glowPulse 0.8s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            from { opacity: 0.4; transform: scaleX(1); }
+            to { opacity: 1; transform: scaleX(1.03); }
+        }
+
+        .bar-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.00); border-radius: 0 90px 90px 0; overflow: visible; position: relative; }
+
+        body.theme-neon .active .bar-fill { box-shadow: 0 0 2px #fff, 0 0 4px var(--m-color), 0 0 8px var(--m-color); }
+        body.theme-neon .active .m-name { text-shadow: 0 0 12px var(--m-color), 0 0 5px #fff; }
+      
+        body.theme-cyberpunk .bar-bg { background: #000; border-radius: 0 }
+        body.theme-cyberpunk .bar-fill { border-radius: 0; border-right: 3px solid #fff; box-shadow: 0 0 15px var(--m-color); }
+        body.theme-cyberpunk .m-avatar { border-radius: 0px !important; }
+
+        body.theme-glow. bar-bg { background: #000; }
+        body.theme-glow .bar-fill { filter: blur(0.5px); box-shadow: 0 0 17px 3px var(--m-color), 0 0 3px #fff; }
+        body.theme-glow .active .m-name { text-shadow: 0 0 12px var(--m-color), 0 0 5px #fff; }
+
+        body.theme-classic .bar-fill { box-shadow: none !important; }
+        body.theme-classic .active .m-name { text-shadow: none !important; color: #FFFFFF; }
+      
+        body.theme-pink .bar-bg { background-color: #4A2E35 !important; }
+        body.theme-pink .bar-fill { background-color: #FFA8B4 !important; border: none !important; box-shadow: none !important; height: 60% !important; }
+        body.theme-pink .active .bar-fill { background-color: #FFFFFF !important; border: none !important; box-shadow: 0 0 8px #FF69B4, 0 0 18px #FF1493 !important; }
+        body.theme-pink .active .m-avatar { border-color: #FFFFFF !important; box-shadow: 0 0 10px #FF69B4, 0 0 20px #FF1493 !important; }
+        body.theme-pink .active .m-name { color: #FFFFFF !important; text-shadow: 0 0 18px #FF69B4, 0 0 20px #FF1493 !important; }
+        body.theme-pink .active .time-display { color: #FFFFFF !important; text-shadow: 0 0 6px #FF69B4, 0 0 15px #FF1493 !important; }
+
+
+body.theme-m-color .bar-bg { 
+    background-color: #000 !important; 
+}
+
+body.theme-m-color .bar-fill { 
+    background-color: #fff !important; 
+    border: none !important; 
+    box-shadow: none !important; 
+    height: 70% !important; 
+}
+
+       body.theme-m-color .active .bar-fill { 
+    background-color: color-mix(in srgb, var(--m-color) 80%, #ffffff 20%) !important; 
+}
+
+
+body.theme-m-color .active .m-name { 
+    color: color-mix(in srgb, var(--m-color) 50%, #ffffff 50%) !important; 
+}
+
+/* Isso vai pegar o texto do tempo, da porcentagem e QUALQUER ícone/engrenagem que esteja lá dentro */
+body.theme-m-color .active .time-display,
+body.theme-m-color .active .m-pct,
+body.theme-m-color .active .time-display *,
+body.theme-m-color .active .m-pct * { 
+    color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+    -webkit-text-fill-color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+}
+
+body.theme-m-color .active .m-avatar {
+    border: 5px solid color-mix(in srgb, var(--m-color) 60%, #ffffff 40%) !important;
+    border-radius: 50% !important;
+    box-sizing: content-box !important;
+    overflow: visible !important; /* Garante que o brilho apareça para fora */
+}
+
+/* Aplica o GLOW perfeito e esfumaçado direto na foto da integrante */
+body.theme-m-color .active .m-avatar img {
+    border-radius: 50% !important;
+    box-shadow: 0 0 20px 5px color-mix(in srgb, var(--m-color) 80%, #ffffff 20%) !important;
+}
+
+       
+       /* 1. Como ele fica normal (apagado) */
+body.theme-m-color .box-display {
+    color: #52525b !important;
+}
+
+/* 2. Como ele fica quando está ATIVO (aceso com o color-mix) */
+body.theme-m-color .active .box-display { 
+    color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important; 
+}
+
+/* ==========================================
+   TESTE FORÇADO PARA A ENGRENAGEM ATIVA
+   ========================================== */
+
+/* 1. Pinta o ícone da engrenagem (seja SVG, FontAwesome ou texto) */
+body.theme-m-color .active button,
+body.theme-m-color .active button i,
+body.theme-m-color .active .edit-time,
+body.theme-m-color .active .settings-btn,
+body.theme-m-color .active [class*="gear"],
+body.theme-m-color .active [class*="edit"] {
+    color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+    -webkit-text-fill-color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+}
+
+/* 2. Opcional: Se quiser que o quadradinho de fundo dela também mude de cor */
+body.theme-m-color .active button {
+    background-color: #000 !important;
+    border: 1px solid color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+}
+
+
+
+body.theme-orange .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-orange .bar-fill { 
+    background-color: #FFCFDC !important; 
+    background: #FFCFDC !important;      
+    border: none !important;                  
+    height: 60% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #D86884 !important; 
+}
+
+body.theme-orange .active .bar-fill { 
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #FFFFFF, 
+                0 0 20px #FF005d,
+                0 0 20px #FF005d,
+                0 0 20px #FF005D !important; 
+}
+
+body.theme-orange .m-name,
+body.theme-orange .box-display,    
+body.theme-orange .time-display,
+body.theme-orange .pct-display {   
+    color: #FFCFDC !important;
+    text-shadow: -0.5px -0.5px 0 #D86884,  
+                  0.5px -0.5px 0 #D86884,
+                 -0.5px  0.75px 0 #D86884,
+                  0.75px  0.75px 0 #D86884 !important; 
+}
+
+body.theme-orange .active .m-name { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 10px #FF69B4 !important; 
+}
+body.theme-orange .active .time-display { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 4px #FF69B4 !important; 
+}
+
+body.theme-orange .active .m-avatar { border-color: #FFFFFF !important; box-shadow: 0 0 20px #FF005d !important; }
+body.theme-orange .active .m-name { color: #FFFFFF !important; text-shadow: 0 0 20px #FF005d !important; }
+body.theme-orange .active .time-display { color: #FFFFFF !important; text-shadow: 0 0 12px #FF005d !important; }
+
+body.theme-icon .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    background: rgba(255, 255, 255, 0.03);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+border: 1px solid rgba(255, 255, 255, 0.05);
+
+}
+
+body.theme-icon .bar-fill { 
+    background-color: rgba(255, 255, 255, 0.2) !important; 
+    background: rgba(255, 255, 255, 0.5) !important;      
+    border: none !important;                  
+    box-shadow: none !important;
+    height: 70% !important; 
+    border-radius: 0px 4px 4px 0px !important;
+}
+
+body.theme-icon .active .bar-fill { 
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border: 1px solid #FFFFFF !important; 
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6) !important; 
+    border-radius: 0px 4px 4px 0px !important;
+}
+
+body.theme-icon .m-name,
+body.theme-icon .time-display,
+body.theme-icon .pct-display {
+    color: #A0A0A0 !important;
+    text-shadow: none !important;
+}
+
+body.theme-icon .active .m-name,
+body.theme-icon .active .time-display,
+body.theme-icon .active .pct-display {
+    color: #FFFFFF !important;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important; 
+}
+
+body.theme-icon .active .m-avatar { 
+    border-color: #fff; border-width: 5px; box-shadow: 0 0 18px var(--m-color); 
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6) !important;
+}
+
+body.theme-cyberneon .bar-bg { 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.theme-cyberneon .bar-fill { 
+    background-color: #fff !important; 
+    background: #fff !important;      
+    border: none !important;                  
+    box-shadow: 0 1px 0px 1px #444 !important; 
+    height: 70% !important; 
+    border-radius: 0px 6px 6px 0px !important;
+}
+
+body.theme-cyberneon .active .bar-fill { 
+    background-color: #FFFF00 !important; 
+    background: #FFFF00 !important;
+    border: none !important; 
+    border-radius: 0px 2px 2px 0px !important;
+    box-shadow: 0 1px 0px 1px #878700, 
+                0 0 1px #878700, 
+                0 0 1px #878700 !important; 
+}
+
+body.theme-cyberneon .active .m-name,
+body.theme-cyberneon .active .time-display,
+body.theme-cyberneon .active .pct-display {
+    color: #FFFF00 !important;
+    text-shadow: 0 0 25px #878700 !important;
+}
+body.theme-cyberneon .active .m-avatar { 
+    border-color: #ffff00; border-width: 5px; box-shadow: 0 0 18px var(--m-color); 
+    box-shadow: 0 0 25px #878700 !important;
+}
+
+body.theme-glassmorphism .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+}
+      
+body.theme-glassmorphism .bar-fill { 
+    background-color: rgba(255, 255, 255, 0.15) !important; 
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(4px) !important;
+    box-shadow: none !important;
+    height: 70% !important; 
+    border-radius: 0px 4px 4px 0px !important;
+}
+
+body.theme-glassmorphism .active .bar-fill { 
+    background-color: transparent !important;
+    background: linear-gradient(90deg, #FFA8B4 0%, #D1B3FF 100%) !important; 
+    border: none !important; 
+    border-radius: 0px 4px 4px 0px !important;
+    box-shadow: 0 0 15px rgba(209, 179, 255, 0.6) !important; 
+}
+
+body.theme-glassmorphism .m-name,
+body.theme-glassmorphism .time-display,
+body.theme-glassmorphism .pct-display {
+    color: rgba(255, 255, 255, 0.4) !important;
+    text-shadow: none !important;
+}
+
+body.theme-glassmorphism .active .m-name,
+body.theme-glassmorphism .active .time-display,
+body.theme-glassmorphism .active .pct-display {
+    background: linear-gradient(90deg, #FFA8B4 0%, #D1B3FF 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important; 
+    color: transparent !important;
+    text-shadow: none !important;
+    display: inline-block !important; 
+}
+
+body.theme-glassmorphism .active .m-avatar {
+    position: relative !important;
+    border: none !important; 
+    box-shadow: 0 0 8px rgba(209, 179, 255, 0.4) !important;
+}
+
+body.theme-glassmorphism .active .m-avatar::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -3px !important;
+    left: -3px !important;
+    right: -3px !important;
+    bottom: -3px !important;
+    background: linear-gradient(90deg, #FFA8B4, #D1B3FF) !important;
+    border-radius: 50% !important;
+    z-index: -1 !important; 
+}
+
+       /* ==========================================================================
+   TEMA: CYBERPUNK (INSPIRADO)
+   ========================================================================== */
+body.theme-spacial .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-spacial .bar-fill { 
+    background-color: #282866 !important; /* Ciano Elétrico */
+    background: #282866 !important;      
+    border: none !important;                  
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #141432 !important; /* Contorno Ciano Escuro */
+}
+
+body.theme-spacial .active .bar-fill { 
+    background-color: #00f3ff !important; 
+    background: #00f3ff !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #005f73, 
+                0 0 20px #005f73,
+                0 0 20px #005f73,
+                0 0 20px #005f73 !important; /* Glow Rosa Cyberpunk */
+}
+
+body.theme-spacial .m-name,
+body.theme-spacial .box-display,    
+body.theme-spacial .time-display,
+body.theme-spacial .pct-display {   
+    color: #282866 !important;
+    text-shadow: -0.5px -0.5px 0 #141432,  
+                  0.5px -0.5px 0 #141432,
+                 -0.5px  0.75px 0 #141432,
+                  0.75px  0.75px 0 #141432 !important; 
+}
+
+/* Avatar Ativo */
+body.theme-spacial .active .m-avatar { 
+    border-color: #00f3ff !important; 
+    border-radius: 50% !important; 
+    box-shadow: 0 0 20px #005f73 !important; 
+}
+
+body.theme-spacial .active .m-name { color: #00f3ff !important; text-shadow: 0 0 20px #005f73 !important; }
+body.theme-spacial .active .time-display { color: #00f3ff !important; text-shadow: 0 0 12px #005f73 !important; }
+
+       /* ==========================================================================
+   TEMA: Y2K RETRO (INSPIRADO)
+   ========================================================================== */
+body.theme-y2k .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-y2k .bar-fill { 
+    background-color: #a3e635 !important; /* Verde Limão */
+    background: #a3e635 !important;      
+    border: none !important;                  
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #3f6212 !important; /* Contorno Verde Escuro */
+}
+
+body.theme-y2k .active .bar-fill { 
+    background-color: #FFFF7F !important; 
+    background: #FFFF7F !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #FFFFFF, 
+                0 0 20px #ffdd00,
+                0 0 20px #ffdd00,
+                0 0 20px #ffdd00 !important; /* Glow Roxo Pop */
+}
+
+body.theme-y2k .m-name,
+body.theme-y2k .box-display,    
+body.theme-y2k .time-display,
+body.theme-y2k .pct-display {   
+    color: #a3e635 !important;
+    text-shadow: -0.5px -0.5px 0 #3f6212,  
+                  0.5px -0.5px 0 #3f6212,
+                 -0.5px  0.75px 0 #3f6212,
+                  0.75px  0.75px 0 #3f6212 !important; 
+}
+
+body.theme-y2k .active .m-avatar { border-color: #FFFc9e !important; box-shadow: 0 0 15px #ffdd00 !important; }
+body.theme-y2k .active .m-name { color: #FFFc9e !important; text-shadow: 0 0 15px #ffdd00 !important; }
+body.theme-y2k .active .time-display { color: #FFFc9e !important; text-shadow: 0 0 15px #ffdd00 !important; }
+
+       /* ==========================================================================
+   TEMA: DARK VELVET / GOLD (INSPIRADO)
+   ========================================================================== */
+body.theme-cream .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-cream .bar-fill { 
+    background-color: #f3e5ab !important; /* Dourado Champagne */
+    background: #f3e5ab !important;      
+    border: none !important;                  
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #5c4d24 !important; /* Contorno Marrom Luxo */
+}
+
+body.theme-cream .active .bar-fill { 
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #FFFFFF, 
+                0 0 20px #d4af37,
+                0 0 20px #d4af37,
+                0 0 20px #d4af37 !important; /* Glow Dourado Real */
+}
+
+body.theme-cream .m-name,
+body.theme-cream .box-display,    
+body.theme-cream .time-display,
+body.theme-cream .pct-display {   
+    color: #f3e5ab !important;
+    text-shadow: -0.5px -0.5px 0 #5c4d24,  
+                  0.5px -0.5px 0 #5c4d24,
+                 -0.5px  0.75px 0 #5c4d24,
+                  0.75px  0.75px 0 #5c4d24 !important; 
+}
+
+body.theme-cream .active .m-avatar { border-color: #FFFFFF !important; box-shadow: 0 0 20px #d4af37 !important; }
+body.theme-cream .active .m-name { color: #FFFFFF !important; text-shadow: 0 0 20px #d4af37 !important; }
+body.theme-cream .active .time-display { color: #FFFFFF !important; text-shadow: 0 0 12px #d4af37 !important; }
+
+
+       /* ==========================================================================
+   TEMA: DARK FOREST (APENAS CORES)
+   ========================================================================== */
+body.theme-darkforest .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-darkforest .bar-fill { 
+    background-color: #ab4400 !important; /* Verde Esmeralda escuro */
+    background: #ab4400 !important;      
+    border: none !important;                  
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #702c02 !important; /* Contorno escuro terroso */
+}
+
+body.theme-darkforest .active .bar-fill { 
+    background-color: #00ae0b !important; 
+    background: #00ae0b !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #00ae0b, 
+                0 0 20px #007a08,
+                0 0 20px #007a08,
+                0 0 20px #007a08 !important; /* Glow Roxo Ametista */
+}
+
+body.theme-darkforest .m-name,
+body.theme-darkforest .box-display,    
+body.theme-darkforest .time-display,
+body.theme-darkforest .pct-display {   
+    color: #ab4400 !important; /* Verde menta claro */
+    text-shadow: -0.5px -0.5px 0 #702c02,  
+                  0.5px -0.5px 0 #702c02,
+                 -0.5px  0.75px 0 #702c02,
+                  0.75px  0.75px 0 #702c02 !important; 
+}
+
+body.theme-darkforest .active .m-avatar { border-color: #00ae0b !important; border-radius: 50% !important; box-shadow: 0 0 20px #00ae0b !important; }
+body.theme-darkforest .active .m-name { color: #00ae0b !important; text-shadow: 0 0 20px #00ae0b !important; }
+body.theme-darkforest .active .time-display { color: #00ae0b !important; text-shadow: 0 0 12px #00ae0b !important; }
+
+       
+/* ==========================================================================
+   TEMA: MONO (FOTOGRAFIA P&B RETRÔ)
+   ========================================================================== */
+body.theme-mono .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-mono .bar-fill { 
+    background-color: #444 !important; /* Cinza grafite fosco */
+    background: #444 !important;      
+    border: none !important;                  
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #222 !important; 
+}
+
+body.theme-mono .active .bar-fill { 
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #FFFFFF, 
+                0 0 15px #ffffff,
+                0 0 25px #ffffff !important; /* Brilho de flash de câmera */
+}
+
+body.theme-mono .m-name,
+body.theme-mono .box-display,    
+body.theme-mono .time-display,
+body.theme-mono .pct-display {   
+    color: #666 !important;
+    text-shadow: -0.5px -0.5px 0 #111,  
+                  0.5px -0.5px 0 #111,
+                 -0.5px  0.75px 0 #111,
+                  0.75px  0.75px 0 #111 !important; 
+}
+
+/* Avatar Normal: Força a foto a ser redonda e se ajustar perfeitamente sem cortes bizarros */
+body.theme-mono .m-avatar {
+    filter: grayscale(100%) contrast(110%) !important;
+    border-radius: 50% !important; /* Sempre redondo */
+}
+
+/* Quando Canta: Só ativa a cor e o brilho */
+body.theme-mono .member-row.active .m-avatar { 
+    filter: grayscale(0%) contrast(100%) !important; 
+    border-color: #ffffff !important; /* Ativa a borda branca */
+    box-shadow: 0 0 20px #ffffff, 0 0 35px rgba(255, 255, 255, 0.5) !important; 
+}
+
+
+body.theme-mono .active .m-name { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 15px #ffffff !important; 
+}
+
+body.theme-mono .active .time-display { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 12px #ffffff !important; 
+}
+       
+/* ==========================================================================
+   TEMA: VAPORWAVE (EFEITO NÉVOA/VAPOR NEON)
+   ========================================================================== */
+body.theme-vaporwave .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-vaporwave .bar-fill { 
+    background-color: #8f8f8f !important; 
+    background: #8f8f8f !important;      
+    border: none !important;                  
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0 1px 0px 1px #4f4f4f !important; 
+}
+
+/* Quando ATIVA: O brilho aumenta o "blur" (desfoque) para parecer fumaça se espalhando */
+body.theme-vaporwave .active .bar-fill { 
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    /* Note o aumento dos pixels de desfoque (30px e 45px) para espalhar como névoa */
+    box-shadow: 0 1px 0px 1px #FFFFFF, 
+                0 0 15px #e100ff,
+                0 0 30px #9b51e0,
+                0 0 45px rgba(225, 0, 255, 0.4) !important; 
+}
+
+body.theme-vaporwave .m-name,
+body.theme-vaporwave .box-display,    
+body.theme-vaporwave .time-display,
+body.theme-vaporwave .pct-display {   
+    color: #8f8f8f !important;
+    text-shadow: -0.5px -0.5px 0 #4f4f4f,  
+                  0.5px -0.5px 0 #4f4f4f,
+                 -0.5px  0.75px 0 #4f4f4f,
+                  0.75px  0.75px 0 #4f4f4f !important; 
+}
+       /* Avatar Normal: Fica desfocado, como se estivesse atrás de um vidro com vapor */
+body.theme-vaporwave .m-avatar {
+    border: 5px solid #4f4f4f !important;
+    border-radius: 20% !important;
+    filter: blur(3px) !important; /* Aplica o efeito de névoa/vapor na foto */
+    transition: filter 0.3s ease, border-color 0.3s ease !important; /* Transição suave */
+}
+
+/* Quando Canta: O vapor some e a foto ganha nitidez total com a aura neon */
+body.theme-vaporwave .active .m-avatar { 
+    border-color: #FFFFFF !important; 
+    border: 5px solid #FFFFFF; 
+    border-radius: 20% !important; 
+    filter: blur(0px) !important; /* Foto 100% nítida instantaneamente */
+    box-shadow: 0 0 15px #e100ff, 0 0 35px rgba(225, 0, 255, 0.5) !important; 
+}
+
+body.theme-vaporwave .active .m-name { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 20px #e100ff !important; 
+}
+
+body.theme-vaporwave .active .time-display { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 15px #e100ff !important; 
+}
+
+
+       
+body.theme-glitch .bar-bg { background: transparent !important; border: none !important; box-shadow: none !important; overflow: visible !important; }
+body.theme-glitch .bar-fill { 
+    background-color: #00ffff !important; 
+    height: 70% !important; position: relative; border-radius: 0px 20px 0px !important;
+    box-shadow: 3px 3px 0px #ff0055 !important; /* Sombra seca estilo glitch */
+}
+body.theme-glitch .active .bar-fill { 
+    background-color: #ffffff !important; border-radius: 0px 20px 20px 0px !important;
+    /* Camadas de cores desalinhadas simulando bug de tela */
+    box-shadow: -4px 0px 0px #00ffff, 4px 0px 0px #ff0055, 0 2px 10px rgba(255,255,255,0.5) !important; 
+}
+body.theme-glitch .m-name, body.theme-glitch .box-display, body.theme-glitch .time-display, body.theme-glitch .pct-display {   
+    color: #ffffff !important;
+    text-shadow: 2px 2px 0px #ff0055, -1px -1px 0px #00ffff !important;
+}
+body.theme-glitch .active .m-avatar { 
+    border: 3px solid #ff0055 !important; 
+    border-radius: 50% !important; /* Deixa redondo de novo */
+    box-shadow: -3px 3px 0px #00ffff !important; 
+}
+
+body.theme-glitch .active .m-name { color: #ffffff !important; text-shadow: 3px 3px 0px #ff0055, -2px -2px 0px #00ffff !important; }
+
+/* ==========================================================================
+
+/* ==========================================================================
+   TEMA: COMIC CARTOON RETRÔ (PRETO E BRANCO)
+   ========================================================================== */
+body.theme-comic .bar-bg { 
+    background: transparent !important; 
+    border: none !important; 
+    box-shadow: none !important; 
+    overflow: visible !important; 
+}
+       
+/* Barra Normal: Fundo cinza claro estilo papel de gibi com borda de nanquim */
+body.theme-comic .bar-fill { 
+    background-color: #cccccc !important; 
+    height: 70% !important; 
+    position: relative; 
+    border-radius: 0px 20px 20px 0px !important;
+    border: 1px solid #777 !important; /* Contorno grosso de caneta */
+    box-shadow: 4px 4px 0px #000000 !important; /* Sombra de bloco preta */
+}
+
+/* Quando ATIVA: A barra acende em Branco Puro e a sombra salta ainda mais */
+body.theme-comic .active .bar-fill { 
+    background-color: #ffffff !important; 
+    border: 3px solid #fff !important;
+    border-radius: 0 20px 20px 0px !important;
+    box-shadow: 0px 4px 1px #777 !important; 
+}
+
+/* Textos: Estilo onomatopeia com contorno total e sombra de tinta preta */
+body.theme-comic .m-name, 
+body.theme-comic .box-display, 
+body.theme-comic .time-display, 
+body.theme-comic .pct-display {   
+    color: #777 !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important; /* Letras maiúsculas de quadrinhos */
+    text-shadow: 2.5px 2.5px 0px #000000, -1px -1px 0px #000000, 1px -1px 0px #000000, -1px 1px 0px #000000 !important;
+}
+
+body.theme-comic .active .time-display {
+       color: #FFFFFF !important; 
+       text-shadow: 3px #fff !important; 
+}
+       
+/* Avatar Normal: Foto em 100% Preto e Branco com contorno e sombra de desenho */
+body.theme-comic .m-avatar {
+    filter: grayscale(100%) contrast(120%) !important; /* Transforma a foto em desenho P&B */
+    border: 3px solid #000000 !important;
+    border-radius: 50% !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+    transition: all 0.0s ease !important;
+}
+
+/* Quando ATIVA: O avatar salta para fora com uma sombra seca branca e contorno forte */
+body.theme-comic .active .m-avatar { 
+    filter: grayscale(100%) contrast(140%) !important; /* Aumenta o impacto do desenho */
+    border: 3px solid #000 !important; 
+    border-radius: 50% !important; 
+    box-shadow: 5px 5px 0px #ffffff, 8px 8px 0px #777 !important; /* Sombra dupla (Branca + Preta) */
+}
+
+body.theme-comic .active .m-name { 
+    color: #ffffff !important; 
+    text-shadow: 4px 4px 0px #000000, -1px -1px 0px #000000, 1px -1px 0px #000000, -1px 1px 0px #000000 !important; 
+}
+
+/* ==========================================================================
+   TEMA: STEALTH ULTRAPREMIUM (NEUMORFISMO SOMBRIO)
+   ========================================================================== */
+
+/* Remove fundos padrões chatos para criar a ilusão de profundidade */
+body.theme-stealth .bar-bg { 
+    background: rgba(255, 255, 255, 0.02) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.8), inset -2px -2px 5px rgba(255, 255, 255, 0.05) !important;
+    overflow: hidden !important; 
+    height: 12px !important; /* Deixa um pouco mais encorpada como um sulco */
+    border-radius: 0px 20px 20px 0px !important;
+}
+
+/* A barra de progresso vira um feixe de plasma líquido correndo dentro do sulco */
+body.theme-stealth .bar-fill { 
+    background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4)) !important; 
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 20px 20px 0px !important;
+    box-shadow: none !important; 
+}
+
+/* Quando ATIVA: O plasma acende em temperatura máxima (Branco Cristal e Neon Gelado) */
+body.theme-stealth .active .bar-fill { 
+    background: linear-gradient(90deg, #ffffff, #8ce7ff) !important; 
+    border-radius: 0px 20px 20px 0px !important;
+    box-shadow: 0 0 15px #00bfff, 
+                0 0 30px rgba(0, 191, 255, 0.5) !important; 
+}
+
+/* Textos Inativos: Elegância total com baixo contraste para não poluir */
+body.theme-stealth .m-name,
+body.theme-stealth .box-display,    
+body.theme-stealth .time-display,
+body.theme-stealth .pct-display {   
+    color: #4a4a4a !important;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.8) !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+}
+
+/* Quando ATIVA: O texto salta para a tela com iluminação branca e pura */
+body.theme-stealth .active .m-name { 
+    color: #ffffff !important; 
+    text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(0,191,255,0.5) !important; 
+}
+body.theme-stealth .active .time-display { 
+    color: #8ce7ff !important; 
+    text-shadow: 0 0 8px rgba(0,191,255,0.6) !important; 
+}
+/* O Avatar: Mantém a foto visível e cria o efeito de moldura esculpida */
+body.theme-stealth .m-avatar { 
+    border: 5px solid #141416 !important;
+    border-radius: 50% !important; 
+    box-shadow: 3px 3px 6px #000000, -3px -3px 6px rgba(255,255,255,0.03) !important;
+    display: inline-block !important; 
+    box-sizing: content-box !important;
+
+    /* Removemos o background fixo para liberar a imagem das meninas */
+}
+
+/* Quando ATIVA: O avatar projeta a aura de eclipse futurista */
+body.theme-stealth .active .m-avatar {
+    border-width: 5px !important; 
+    border-color: #fff !important; 
+    border-radius: 50% !important; 
+    box-shadow: 0 0 20px #8ce7ff, inset 0 0 10px rgba(0,191,255,0.5) !important; 
+}
+
+       /* ==========================================================================
+   TEMA CHROMA - INSPIRAÇÃO STEALTH COM AS CORES DAS INTEGRANTES 
+   ========================================================================== */
+
+/* Remove fundos padrões chatos para criar a ilusão de profundidade */
+body.theme-chroma .bar-bg { 
+    background: rgba(255, 255, 255, 0.02) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.8), inset -2px -2px 5px rgba(255, 255, 255, 0.05) !important;
+    overflow: hidden !important; 
+    height: 12px !important; 
+    border-radius: 0px 20px 20px 0px !important;
+}
+
+/* A barra de progresso em repouso (plasma neutro) */
+body.theme-chroma .bar-fill { 
+    background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3)) !important; 
+    height: 70% !important;                  
+    position: relative;
+    border-radius: 0px 20px 20px 0px !important;
+    box-shadow: none !important; 
+}
+
+/* Quando ATIVA: O plasma acende com a cor da integrante (--m-color) */
+body.theme-chroma .active .bar-fill { 
+    /* Cria um degradê indo do branco até a cor da integrante */
+    background: linear-gradient(90deg, #ffffff, var(--m-color)) !important; 
+    border-radius: 0px 20px 20px 0px !important;
+    /* Brilho neon usando a cor dela */
+    box-shadow: 0 0 15px var(--m-color), 
+                0 0 30px var(--m-color) !important; 
+}
+
+/* Textos Inativos: Elegância com baixo contraste */
+body.theme-chroma .m-name,
+body.theme-chroma .box-display,    
+body.theme-chroma .time-display,
+body.theme-chroma .pct-display {   
+    color: #4a4a4a !important;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.8) !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+}
+
+/* Quando ATIVA: O nome brilha em branco com a aura da cor dela ao fundo */
+body.theme-chroma .active .m-name { 
+    color: #ffffff !important; 
+    text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px var(--m-color) !important; 
+}
+
+/* Tempo ativo puxa a cor da integrante direta */
+body.theme-chroma .active .time-display { 
+    color: var(--m-color) !important; 
+    text-shadow: 0 0 8px var(--m-color) !important; 
+}
+
+/* O Avatar Normal: Moldura escura esculpida */
+body.theme-chroma .m-avatar { 
+    border: 5px solid #141416 !important;
+    border-radius: 50% !important; 
+    box-shadow: 3px 3px 6px #000000, -3px -3px 6px rgba(255,255,255,0.03) !important;
+    display: inline-block !important; 
+    box-sizing: content-box !important;
+}
+
+/* Quando ATIVA: A borda fica branca pura e solta o brilho neon da cor da integrante */
+body.theme-chroma .active .m-avatar {
+    border-width: 5px !important; 
+    border-color: #ffffff !important; 
+    border-radius: 50% !important; 
+    /* Brilho externo e interno baseados na cor da integrante */
+    box-shadow: 0 0 20px var(--m-color), inset 0 0 10px var(--m-color) !important; 
+}
+
+       /* ==========================================================================
+   TEMA Y2K POP RETRO - ESTILO ANOS 2000 (TOTALMENTE DIFERENTE DO STEALTH)
+   ========================================================================== */
+
+/* A canaleta vira um bloco sólido com borda marcada e sombra estilo pop art */
+body.theme-glass .bar-bg { 
+    background: #000 !important; /* Fundo branco para destacar no painel preto */
+    border: 3px solid #1a1a1a !important; /* Borda de quadrinhos bem grossa */
+    box-shadow: 3px 3px 0px #1a1a1a !important; /* Sombra sólida e sem desfoque */
+    overflow: hidden !important; 
+    height: 13px !important; /* Bem grossa e marcante */
+    border-radius: 0px 20px 20px 0px !important; /* Cantos arredondados estilo chiclete */
+}
+
+/* A barra de progresso em repouso (vazia) */
+body.theme-glass .bar-fill { 
+    background: #888 !important; /* Cinza claro bem limpo */
+    height: 70% !important;                  
+    border-radius: 0px 20px 20px 0px !important;
+    box-shadow: none !important; 
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Efeito "bounce" elástico ao encher */
+}
+
+/* Quando ATIVA: Enche com a cor da integrante em tom pastel/sólido vibrante */
+body.theme-glass .active .bar-fill { 
+    background: var(--m-color) !important; 
+    border-right: 3px solid #fff !important; /* Divisor marcado na ponta da barra */
+}
+
+/* Textos em Alta Definição e Estilo Revista/Cartoon */
+body.theme-glass .m-name,
+body.theme-glass .box-display,    
+body.theme-glass .time-display,
+body.theme-glass .pct-display {   
+    color: #888 !important;
+    font-weight: 900 !important; /* Texto super grosso */
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    -webkit-text-stroke: 1px #1a1a1a; /* Contorno preto em volta das letras */
+}
+
+/* Quando ATIVA: O texto ganha uma sombra colorida marcante */
+body.theme-glass .active .m-name { 
+    color: #fff !important; 
+    text-shadow: 1.5px 2px 4px var(--m-color) !important; /* Sombra em bloco na cor da integrante */
+}
+
+body.theme-glass .active .time-display,
+body.theme-glass .active .pct-display { 
+    color: var(--m-color) !important;
+    -webkit-text-stroke: 1px #1a1a1a;
+    text-shadow: 2px 2px 0px #1a1a1a !important;
+}
+
+/* O Avatar Normal: Estilo adesivo com borda preta grossa */
+body.theme-glass .m-avatar { 
+    border: 3px solid #1a1a1a !important;
+    border-radius: 50% !important; 
+    box-shadow: 4px 4px 0px #888 transparent !important; /* Sombra sólida deslocada */
+    display: inline-block !important; 
+    box-sizing: content-box !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Quando ATIVA: O avatar pula levemente para a frente e ganha a borda colorida */
+body.theme-glass .active .m-avatar {
+    border-color: #1a1a1a !important; 
+    border-radius: 50% !important; 
+    transform: scale(1.08) translate(-2px, -2px) !important; /* Dá um leve "zoom" físico na integrante ativa */
+    box-shadow: 5px 5px 0px var(--m-color), 5px 5px 0px 3px #1a1a1a !important; /* Sombra dupla colorida estilo Y2K */
+}
+
+       
+        .color-container-block {
+            display: flex; align-items: center; background: #0d0d0d; border: 1px solid #333; height: 38px; padding: 0 6px; box-sizing: border-box; gap: 8px;
+        }
+        .color-bar-wrapper {
+            width: 8px; height: 24px; position: relative; overflow: hidden; flex-shrink: 0;
+        }
+        .color-in {
+            position: absolute; top: -5px; left: -5px; width: 40px; height: 40px; cursor: pointer; opacity: 0; padding:0; margin:0;
+        }
+        .color-bar-visual {
+            width: 100%; height: 100%; border-radius: 1px; pointer-events: none;
+        }
+        .hex-text-in {
+            background: transparent; border: none; color: #fff; font-weight: 900; font-size: 13px; width: 75px; outline: none; font-family: monospace; text-transform: uppercase;
+        }
+
+        body.font-segoe, body.font-segoe * { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif !important; }
+        body.font-poppins, body.font-poppins * { font-family: 'Poppins', sans-serif !important; }
+        body.font-montserrat, body.font-montserrat * { font-family: 'Montserrat', sans-serif !important; }
+        body.font-bebas, body.font-bebas * { font-family: 'Bebas Neue', sans-serif !important; font-weight: normal !important; }
+        body.font-oswald, body.font-oswald * { font-family: 'Oswald', sans-serif !important; }
+        body.font-orbitron, body.font-orbitron * { font-family: 'Orbitron', sans-serif !important; }
+        body.font-rubik, body.font-rubik * { font-family: 'Rubik Mono One', monospace !important; font-weight: normal !important; }
+        body.font-quicksand, body.font-quicksand * { font-family: 'Quicksand', sans-serif !important; }
+        body.font-fredoka, body.font-fredoka * { font-family: 'Fredoka', sans-serif !important; }
+        body.font-inter, body.font-inter * { font-family: 'Inter', sans-serif !important; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .engine-box {
+            background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; border-radius: 8px; width: 90%; max-width: 420px; box-sizing: border-box; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+        .engine-box h1, .engine-box h2 { color: #adff2f; font-size: 15px; letter-spacing: 2px; margin: 0 0 20px 0; font-weight: 900; }
+        .setup-input { background: #141414; border: 1px solid #252525; color: #fff; padding: 12px; border-radius: 6px; font-weight: 900; font-size: 12px; margin: 6px 0; outline: none; width: 100%; box-sizing: border-box; text-align: center; }
+        .go { background: #adff2f; color: #000; padding: 14px; width: 100%; border: none; font-weight: 900; font-size: 12px; letter-spacing: 1px; margin-top: 15px; border-radius: 6px; cursor: pointer; }
+
+        .dock { 
+            position: relative; width: 100%; max-width: 750px; padding: 10px; background: #000; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid #111; box-sizing: border-box; z-index: 1000; flex-shrink: 0; margin: 0 auto; transition: transform 0.4s ease, opacity 0.3s ease;
+        }
+        .dock.dock-hidden { transform: translateY(110%); opacity: 0; pointer-events: none; position: absolute; }
+        #restore-dock-trigger {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 12px; background: rgba(173, 255, 47, 0.2); border-radius: 4px 4px 0 0; z-index: 9999; cursor: pointer; display: none; text-align: center; font-size: 8px; color: #adff2f; line-height: 12px;
+        }
+
+        .dock-row { display: flex; gap: 6px; width: 100%; }
+        .btn { 
+            flex: 1; padding: 10px 4px; background: #0d0d0d; color: #fff; border: 1px solid #1a1a1a; font-size: 9px; letter-spacing: 0.5px; border-radius: 5px; font-weight: 900; text-align: center; white-space: nowrap; cursor: pointer;
+        }
+        #sort-btn { width: 35% !important; flex: none !important; }
+        .btn-toggle-on { border-color: #adff2f !important; color: #adff2f !important; }
+
+        .size-control-container { display: flex; align-items: center; background: #0d0d0d; border: 1px solid #1a1a1a; padding: 6px 12px; border-radius: 5px; gap: 12px; width: 100%; box-sizing: border-box; }
+        .size-control-container span { font-size: 9px; color: #adff2f; letter-spacing: 0.5px; white-space: nowrap; }
+        .size-slider { flex: 1; accent-color: #adff2f; cursor: pointer; height: 4px; }
+
+        .photo-btn { display: block; background: #1a1a1a; border: 1px solid #2d2d2d; color: #adff2f; font-size: 10px; padding: 8px; border-radius: 5px; cursor: pointer; text-align: center; margin-top: 5px; }
+
+        .vid-controls {
+            position: relative; width: 100%; max-width: 750px; margin: 0 auto; padding: 6px; background: #050505; display: none; gap: 4px; border-top: 1px solid #111; box-sizing: border-box; z-index: 999; justify-content: center; flex-shrink: 0;
+        }
+        .v-btn { flex: 1; max-width: 70px; padding: 6px 0; background: #0d0d0d; color: #888; border: 1px solid #1a1a1a; font-size: 8px; border-radius: 4px; font-weight: 900; text-align: center; cursor: pointer; }
+        .v-play-active { color: #adff2f !important; border-color: #adff2f !important; }
+
+        #vocal-tap-panels-container { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; padding: 5px 0; }
+        .vocal-member-panel { flex: 1; min-width: calc(25% - 5px); background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 5px; padding: 15px 4px; text-align: center; cursor: pointer; }
+        .vocal-member-panel.vp-active { background: var(--vp-color) !important; border-color: var(--vp-color) !important; }
+        .vocal-member-panel.vp-active .vp-name { color: #000 !important; }
+        .vp-name { font-size: 9px; font-weight: 900; color: #777; letter-spacing: 0.5px; text-transform: uppercase; pointer-events: none; }
+
+        .save-manager-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .sm-header-btn { background: #161616; border: 1px solid #2a2a2a; color: #fff; padding: 6px 12px; font-size: 10px; font-weight: 900; border-radius: 4px; cursor: pointer; }
+        .save-list-container { width: 100%; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+        .save-slot-card { background: #141414; border: 1px solid #222; padding: 10px 14px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .save-slot-card.delete-mode-active { border-color: #ff4444 !important; }
+
+        .hidden { display: none !important; }
+        .hide-position .m-pos { opacity: 0 !important; visibility: hidden !important; }
+        .hide-circle .avatar-wrap { width: 0px !important; height: 0px !important; opacity: 0 !important; margin-right: 0px !important; }
+        
+        .member-input-card { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; background: #141414; padding: 8px; border-radius: 6px; border: 1px solid #222; }
+    </style>
+</head>
+<body class="theme-orange">
+
+    <div id="bg-video-container">
+        <div class="video-overlay"></div>
+        <video id="bg-video" loop playsinline></video>
+    </div>
+
+    <div id="restore-dock-trigger" onclick="showDockPanel()">▲ EXIBIR PAINEL DE CONFIGURAÇÕES ▲</div>
+
+    <div id="app" class="hidden">
+        <div class="main-content-area">
+            <div id="top-stage">
+                <div id="title-header">
+                    <input type="text" id="title-input" value="SONG TITLE HERE" spellcheck="false">
+                </div>
+            </div>
+
+            <div id="pie-stage" class="pie-hidden">
+                <div id="pie-canvas-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            
+            <div id="viewport-container">
+                <div id="viewport"></div>
+            </div>
+        </div>
+
+        <div class="vid-controls" id="video-manual-bar">
+            <button class="v-btn" onclick="skipVid(-10)">-10S</button>
+            <button class="v-btn" onclick="skipVid(-5)">-5S</button>
+            <button class="v-btn" id="m-play-btn" onclick="playVid()">PLAY</button>
+            <button class="v-btn" id="m-stop-btn" onclick="stopVid()">STOP</button>
+            <button class="v-btn" onclick="skipVid(5)">+5S</button>
+            <button class="v-btn" onclick="skipVid(10)">+10S</button>
+        </div>
+
+        <div class="dock" id="main-dock-panel">
+            <div class="size-control-container" id="dock-size-row">
+                <span>LINE SIZE:</span>
+                <input type="range" id="sizeSlider" class="size-slider" min="20" max="120" value="54" oninput="updateLineSizes(this.value)">
+            </div>
+            
+            <div class="dock-row" id="dock-row-1">
+                <button class="btn btn-toggle-on" id="sort-btn" onclick="toggleSort(event)">AUTO-SORT: ON</button>
+                <button class="btn" onclick="resetTimers(event)">RESET</button>
+                <button class="btn" onclick="wipeAll(event)" style="color: #ff4444;">REWORK</button>
+                <button class="btn" id="vid-btn" onclick="triggerVideo(event)">MP4</button>
+            </div>
+            <div class="dock-row" id="dock-row-2">
+                <button class="btn" id="max-btn" onclick="toggleMax(event)">MAX TIME: 0.0</button>
+                <button class="btn" id="font-btn" onclick="openFonts(event)">FONTS</button>
+                <button class="btn" id="save-btn" onclick="openSaveManager(event)" style="color:#adff2f; border-color:#2a2a2a;">SAVE GROUP</button>
+            </div>
+            
+            <div class="dock-row" id="dock-row-3">
+                <button class="btn" id="sdv-btn" onclick="togglePieChart(event)">DISPLAY SDV: OFF</button>
+                <button class="btn" id="vocal-panel-toggle-btn" onclick="toggleVocalPanels(event)" style="flex: 1.3;">VOCAL TAP PANELS</button>
+                <button class="btn" onclick="backToGroupsMenu(event)" style="color: #ffb703; border-color: #333; flex: 0.7;">➔ VOLTAR</button>
+            </div>
+            
+            <div class="dock-row" id="dock-row-4">
+                <button class="btn" id="speed-btn" onclick="cycleSpeed(event)" style="color: #00E5FF;">SPEED: 1.0X</button>
+                <button class="btn" id="theme-btn" onclick="cycleStyles(event)" style="color: #D000FF;">STYLE: ORANGE</button>
+                <button class="btn" onclick="hideDockPanel(event)" style="color: #aaa; background: #111;">HIDE DOCK</button>
+            </div>
+
+            <div id="vocal-tap-panels-container" class="hidden"></div>
+            <input type="file" id="video-upload" accept="video/*" style="display:none;" onchange="handleVideo(this)">
+        </div>
+    </div>
+
+    <div id="setup" class="overlay">
+        <div class="engine-box" id="step1">
+            <h1>LINE DISTRIBUTION</h1>
+            <div style="color: #666; font-size: 9px; margin-bottom: 12px; letter-spacing: 1px;">GERENCIADOR DE CONFIGURAÇÕES</div>
+            <div style="font-size: 11px; margin-bottom: 5px; color: #aaa;">CRIAR NOVO GRUPO</div>
+            <input type="number" id="count" value="6" class="setup-input">
+            <button class="go" onclick="nextStep()">PROSSEGUIR CONFIGURAÇÃO</button>
+            
+            <div style="border-top: 1px solid #1a1a1a; margin-top: 25px; padding-top: 15px;">
+              <button class="go" onclick="makeCombinedLine()" style="background:#FFD700; margin-top:8px;">FAZER LINE</button>
+                <div style="font-size: 10px; color: #adff2f; text-align: left; margin-bottom: 10px; letter-spacing: 0.5px;">GRUPOS SALVOS:</div>
+                <div id="main-saved-list" style="max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;"></div>
+            </div>
+        </div>
+
+        <div class="engine-box hidden" id="step2">
+            <h2>INTEGRANTES</h2>
+            <div id="inputs" style="max-height: 45vh; overflow-y: auto; padding-right: 4px;"></div>
+            <button class="go" onclick="startEngine()">START ENGINE</button>
+        </div>
+    </div>
+
+    <div id="font-dialog" class="overlay hidden">
+        <div class="engine-box">
+            <h2>SELECT SYSTEM FONT</h2>
+            <div style="display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto; padding-right:4px;">
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Segoe UI')">Segoe UI</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Poppins')">Poppins</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Montserrat')">Montserrat</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Bebas')">Bebas Neue</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Oswald')">Oswald</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Quicksand')">Quicksand</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Fredoka')">Fredoka</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Inter')">Inter</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Orbitron')">Orbitron</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Rubik')">Rubik Block</button>
+            </div>
+            <button class="sm-header-btn" style="margin-top:15px; width:100%; border-color:#ff4444; color:#ff4444;" onclick="closeFonts()">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="save-group-creator" class="overlay hidden">
+        <div class="engine-box">
+            <h2>NAME YOUR GROUP</h2>
+            <input type="text" id="save-group-title-input" placeholder="ENTER GROUP NAME" class="setup-input">
+            <button class="go" onclick="commitGroupSave()">SAVE CONFIGURATION</button>
+            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#ff4444; color:#ff4444;" onclick="closeGroupCreator()">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="save-manager-dialog" class="overlay hidden">
+        <div class="engine-box">
+            <div class="save-manager-header">
+                <button class="sm-header-btn" id="sm-delete-toggle" onclick="toggleSaveDeleteMode()" style="color:#ff4444;">EXCLUIR</button>
+                <span style="font-size:11px; color:#adff2f;">GERENCIAR</span>
+                <button class="sm-header-btn" onclick="closeSaveManager()">FECHAR</button>
+            </div>
+            <div class="save-list-container" id="save-list-target"></div>
+        </div>
+    </div>
+
+    <div id="custom-edit-modal" class="overlay hidden">
+        <div class="engine-box">
+            <h2 id="custom-edit-title">NOVO TEMPO</h2>
+            <input type="number" step="0.1" id="custom-edit-input" class="setup-input" inputmode="decimal">
+            <button class="go" onclick="saveCustomEditTime()">CONFIRMAR</button>
+            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#adff2f; color:#adff2f;" onclick="closeCustomEditTime()">➔ VOLTAR PARA OS GRUPOS</button>
+        </div>
+    </div>
+
+    <div id="custom-max-modal" class="overlay hidden">
+        <div class="engine-box">
+            <h2>SET MAX TIME</h2>
+            <input type="number" step="0.1" id="custom-max-input" class="setup-input" inputmode="decimal">
+            <button class="go" onclick="saveCustomMaxTime()">CONFIRMAR</button>
+            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#adff2f; color:#adff2f;" onclick="closeCustomMaxTime()">➔ VOLTAR PARA OS GRUPOS</button>
+        </div>
+    </div>
+
+    <script>
+    let members = [];
+    let lastTime = 0;
+    let activeLoop = null;
+    let selectedLineGroups = [];
+    let autoSort = true;
+    let manualMax = 0; 
+    let showMax = false;
+    let saveDeleteMode = false;
+    let currentLineHeight = 54; 
+    let vocalPanelsMode = false;
+    let showPieChart = false;
+    let currentEditingMemberId = null;
+
+    let currentSpeed = 1.0;
+    const speedOptions = [1.0, 0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 3.0, 4.0, 5.0, 6.25, 7.5, 8.75, 10];
+    let currentThemeIndex = 0;
+    const themes = [ "orange", "cream", "icon", "cyberneon", "spacial", "glitch", "comic", "m-color", "neon", "cyberpunk", "glow", "classic", "pink", "glassmorphism", "y2k", "mono", "vaporwave","darkforest", "stealth", "chroma", "glass"];
+
+    const crystalColors = ["#adff2f", "#00E5FF", "#D000FF", "#FF0055", "#00FF66", "#FFDD00", "#0066FF"];
+
+    window.addEventListener('load', () => { renderMainSetupSaves(); });
+
+    function toggleLineGroup(index, btn) {
+        if (selectedLineGroups.includes(index)) {
+            selectedLineGroups = selectedLineGroups.filter(i => i !== index);
+            btn.innerHTML = "⭐️";
+        } else {
+            selectedLineGroups.push(index);
+            btn.innerHTML = "✅";
+        }
+    }
+
+    function backToGroupsMenu(e) {
+        if(e) e.preventDefault();
+        if(activeLoop) cancelAnimationFrame(activeLoop);
+        
+        const v = document.getElementById('bg-video');
+        v.pause(); v.removeAttribute('src'); v.load();
+        document.getElementById('bg-video-container').style.display = 'none';
+        document.getElementById('video-manual-bar').style.display = 'none';
+
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('setup').classList.remove('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        
+        vocalPanelsMode = false; showPieChart = false;
+        showDockPanel();
+        document.getElementById('sdv-btn').innerText = "DISPLAY SDV: OFF";
+        document.getElementById('sdv-btn').classList.remove('btn-toggle-on');
+        document.getElementById('pie-stage').classList.add('pie-hidden');
+        document.getElementById('vocal-panel-toggle-btn').classList.remove('btn-toggle-on');
+        document.getElementById('vocal-tap-panels-container').classList.add('hidden');
+        
+        renderMainSetupSaves();
+    }
+
+    function cycleSpeed(e) {
+        if(e) e.preventDefault();
+        let idx = speedOptions.indexOf(currentSpeed);
+        idx = (idx + 1) % speedOptions.length;
+        currentSpeed = speedOptions[idx];
+        document.getElementById('speed-btn').innerText = `SPEED: ${currentSpeed}X`;
+        const v = document.getElementById('bg-video');
+        if (v && v.src) { v.playbackRate = currentSpeed; }
+    }
+
+    function cycleStyles(e) {
+        if(e) e.preventDefault();
+        document.body.classList.remove(`theme-${themes[currentThemeIndex]}`);
+        currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+        let newTheme = themes[currentThemeIndex];
+        document.body.classList.add(`theme-${newTheme}`);
+        document.getElementById('theme-btn').innerText = `STYLE: ${newTheme.toUpperCase()}`;
+    }
+
+    function hideDockPanel(e) {
+        if(e) e.preventDefault();
+        document.getElementById('main-dock-panel').classList.add('dock-hidden');
+        document.getElementById('restore-dock-trigger').style.display = 'block';
+    }
+
+    function selectFont(fontName) {
+        document.body.classList.remove('font-segoe', 'font-poppins', 'font-montserrat', 'font-bebas', 'font-oswald', 'font-orbitron', 'font-rubik', 'font-quicksand', 'font-fredoka', 'font-inter');
+        document.body.classList.add(`font-${fontName.toLowerCase()}`);
+        closeFonts();
+    }
+
+    function showDockPanel() {
+        document.getElementById('main-dock-panel').classList.remove('dock-hidden');
+        document.getElementById('restore-dock-trigger').style.display = 'none';
+    }
+
+    function updateLineSizes(val) {
+        currentLineHeight = parseInt(val);
+        const vp = document.getElementById('viewport');
+        const container = document.getElementById('viewport-container');
+        if (vp) {
+            vp.style.setProperty('--row-height', currentLineHeight + 'px');
+            vp.style.height = (members.length * currentLineHeight) + 'px';
+        }
+        if (container) {
+            if (currentLineHeight < 80) { container.classList.add('hide-position'); } else { container.classList.remove('hide-position'); }
+            if (currentLineHeight < 40) { container.classList.add('hide-circle'); } else { container.classList.remove('hide-circle'); }
+        }
+    }
+
+    function triggerVideo(e) { if(e) e.preventDefault(); document.getElementById('video-upload').click(); }
+    function handleVideo(input) {
+        const file = input.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            const v = document.getElementById('bg-video');
+            v.src = url;
+            v.playbackRate = currentSpeed;
+            document.getElementById('bg-video-container').style.display = 'block';
+            document.getElementById('video-manual-bar').style.display = 'flex';
+            playVid();
+        }
+    }
+    function playVid() {
+        const v = document.getElementById('bg-video');
+        if (v.src) { v.play(); document.getElementById('m-play-btn').classList.add('v-play-active'); document.getElementById('m-stop-btn').classList.remove('v-play-active'); }
+    }
+    function stopVid() {
+        const v = document.getElementById('bg-video');
+        if (v.src) { v.pause(); document.getElementById('m-stop-btn').classList.add('v-play-active'); document.getElementById('m-play-btn').classList.remove('v-play-active'); }
+    }
+    function skipVid(secs) { const v = document.getElementById('bg-video'); if (v.src) { v.currentTime += secs; } }
+    
+    function togglePieChart(e) {
+        if(e) e.preventDefault();
+        showPieChart = !showPieChart;
+        const btn = document.getElementById('sdv-btn');
+        const stage = document.getElementById('pie-stage');
+        if(showPieChart) {
+            btn.innerText = "DISPLAY SDV: ON"; btn.classList.add('btn-toggle-on'); stage.classList.remove('pie-hidden');
+        } else {
+            btn.innerText = "DISPLAY SDV: OFF"; btn.classList.remove('btn-toggle-on'); stage.classList.add('pie-hidden');
+        }
+    }
+
+    function toggleMax(e) {
+        if(e) e.preventDefault();
+        document.getElementById('custom-max-input').value = manualMax || "";
+        document.getElementById('custom-max-modal').classList.remove('hidden');
+    }
+    function saveCustomMaxTime() {
+        let inputVal = document.getElementById('custom-max-input').value.trim();
+        let val = parseFloat(inputVal);
+        if (inputVal !== "" && !isNaN(val) && val >= 0) {
+            manualMax = val; showMax = true;
+            const btn = document.getElementById('max-btn');
+            btn.classList.add('btn-toggle-on'); btn.innerText = `MAX TIME: ${manualMax.toFixed(1)}`;
+        } else {
+            showMax = false; manualMax = 0;
+            const btn = document.getElementById('max-btn');
+            btn.classList.remove('btn-toggle-on'); btn.innerText = "MAX TIME: 0.0";
+        }
+        closeCustomMaxTime();
+    }
+    function closeCustomMaxTime() { document.getElementById('custom-max-modal').classList.add('hidden'); }
+
+    function deleteGroupFromMainInterface(index) {
+        if(!confirm("TEM CERTEZA QUE DESEJA EXCLUIR ESTE GRUPO?")) return;
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        arrayData.splice(index, 1);
+        localStorage.setItem('KPOP_LINE_SAVED_GROUPS', JSON.stringify(arrayData));
+        renderMainSetupSaves();
+    }
+
+    function openFonts(e) { if(e) e.preventDefault(); document.getElementById('font-dialog').classList.remove('hidden'); }
+    function closeFonts() { document.getElementById('font-dialog').classList.add('hidden'); }
+    
+    function openSaveManager(e) {
+        if(e) e.preventDefault();
+        if (members.length > 0) {
+            let currentTitle = document.getElementById('title-input').value.trim();
+            document.getElementById('save-group-title-input').value = (currentTitle === "SONG HERE") ? "" : currentTitle;
+            document.getElementById('save-group-creator').classList.remove('hidden');
+        } else {
+            saveDeleteMode = false; renderSaveList(); document.getElementById('save-manager-dialog').classList.remove('hidden');
+        }
+    }
+    function closeGroupCreator() { document.getElementById('save-group-creator').classList.add('hidden'); }
+
+    function commitGroupSave() {
+        let typedTitle = document.getElementById('save-group-title-input').value.trim().toUpperCase();
+        if(!typedTitle) return;
+        document.getElementById('title-input').value = typedTitle;
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        let existingIndex = arrayData.findIndex(item => item.title.toUpperCase() === typedTitle);
+        let cleanMembers = members.map(m => ({ id: m.id, name: m.name, pos: m.pos, color: m.color, img: m.img, time: m.time }));
+        if(existingIndex >= 0) { arrayData[existingIndex].members = cleanMembers; } 
+        else { arrayData.push({ title: typedTitle, members: cleanMembers }); }
+        
+        try {
+            localStorage.setItem('KPOP_LINE_SAVED_GROUPS', JSON.stringify(arrayData));
+            closeGroupCreator(); saveDeleteMode = false; renderSaveList(); renderMainSetupSaves();
+            document.getElementById('save-manager-dialog').classList.remove('hidden');
+        } catch (error) {
+            alert("ERRO: MEMÓRIA CHEIA!");
+            console.error(error);
+        }
+    }
+
+    function closeSaveManager() { document.getElementById('save-manager-dialog').classList.add('hidden'); }
+    function toggleSaveDeleteMode() {
+        saveDeleteMode = !saveDeleteMode;
+        document.getElementById('sm-delete-toggle').classList.toggle('btn-toggle-on', saveDeleteMode);
+        renderSaveList();
+    }
+
+    function renderMainSetupSaves() {
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        let target = document.getElementById('main-saved-list');
+        if(arrayData.length === 0) { target.innerHTML = `<div style="color:#444; font-size:10px; padding:10px;">NENHUM GRUPO SALVO</div>`; return; }
+        target.innerHTML = arrayData.map((item, index) => `
+            <div style="background:#141414; border:1px solid #222; padding:8px 12px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
+                <div style="flex:1; min-width:0; margin-right:8px;">
+                    <div style="font-size:11px; color:#fff; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.title}</div>
+                    <div style="font-size:8px; color:#666;">INTEGRANTES: ${item.members.length}</div>
+                </div>
+                <div style="display:flex; gap:5px; flex-shrink:0;">
+                    <button onclick="deleteGroupFromMainInterface(${index})" style="background:#ff4444; border:none; color:#fff; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">EXCLUIR ✖</button>
+                    <button onclick="editSavedGroup(${index})" style="background:#00E5FF; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">EDITAR ⚙️</button>
+                    <button onclick="loadSavedGroupDirectly(${index})" style="background:#adff2f; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">CARREGAR ➔</button>
+                    <button onclick="toggleLineGroup(${index}, this)" style="background:#FFD700; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;"> ⭐️ </button>
+                </div>
+            </div>
+        `).join('');
+    } 
+
+    function renderSaveList() {
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        let target = document.getElementById('save-list-target');
+        target.innerHTML = arrayData.map((item, index) => `
+            <div class="save-slot-card ${saveDeleteMode ? 'delete-mode-active' : ''}" onclick="handleSlotClick(${index})">
+                <div>
+                    <span style="font-size:11px; color:#fff; display:block;">${item.title}</span>
+                    <span style="font-size:8px; color:#555;">MEMBERS: ${item.members.length}</span>
+                </div>
+                <span style="color:${saveDeleteMode ? '#ff4444':'#adff2f'}; font-size:10px;">${saveDeleteMode ? '[DELETAR]':'➔'}</span>
+            </div>
+        `).join('');
+    }
+
+    function handleSlotClick(index) {
+        if(saveDeleteMode) {
+            let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+            let arrayData = rawData ? JSON.parse(rawData) : [];
+            arrayData.splice(index, 1);
+            localStorage.setItem('KPOP_LINE_SAVED_GROUPS', JSON.stringify(arrayData));
+            renderSaveList(); renderMainSetupSaves();
+        } else {
+            loadSavedGroupDirectly(index);
+        }
+    }
+
+    function loadSavedGroupDirectly(index) {
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        let targetGroup = arrayData[index];
+        if(!targetGroup) return;
+        if(activeLoop) cancelAnimationFrame(activeLoop);
+        document.getElementById('title-input').value = targetGroup.title;
+        members = targetGroup.members.map(m => ({ id: m.id, name: m.name, pos: m.pos || " ", color: m.color, img: m.img || "", time: m.time || 0, active: false, muted: false, posShown: m.time > 0 }));
+        buildViewportDOM(); updateLineSizes(currentLineHeight);
+        if(vocalPanelsMode) buildVocalPanelsDOM();
+        document.getElementById('setup').classList.add('hidden');
+        document.getElementById('save-manager-dialog').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        lastTime = performance.now(); loop();
+    }
+
+    function toggleVocalPanels(e) {
+        if(e) e.preventDefault();
+        vocalPanelsMode = !vocalPanelsMode;
+        const btn = document.getElementById('vocal-panel-toggle-btn');
+        const vocalContainer = document.getElementById('vocal-tap-panels-container');
+        const rowsToHide = [document.getElementById('dock-size-row'), document.getElementById('dock-row-1'), document.getElementById('dock-row-2'), document.getElementById('dock-row-4')];
+        
+        if(vocalPanelsMode) {
+            btn.classList.add('btn-toggle-on');
+            rowsToHide.forEach(r => r.style.display = 'none');
+            buildVocalPanelsDOM();
+            vocalContainer.classList.remove('hidden');
+        } else {
+            btn.classList.remove('btn-toggle-on');
+            vocalContainer.classList.add('hidden');
+            rowsToHide.forEach(r => r.style.display = '');
+        }
+    }
+
+    function buildVocalPanelsDOM() {
+        const container = document.getElementById('vocal-tap-panels-container');
+        container.innerHTML = members.map(m => `
+            <div class="vocal-member-panel ${m.active && !m.muted ? 'vp-active' : ''}" id="vp-panel-${m.id}" onpointerdown="handleVocalPanelTap(event, ${m.id})" style="--vp-color: ${m.color}">
+                 <div class="vp-name">${m.name}</div>
+            </div>
+        `).join('');
+    }
+
+    function handleVocalPanelTap(e, id) { e.preventDefault(); tgl(id); }
+
+    function handleFile(input, index) { 
+        const file = input.files[0]; 
+        if (file) { 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                const imgNode = new Image();
+                imgNode.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 120; canvas.height = 120;
+                    let sourceX = 0, sourceY = 0, sourceWidth = imgNode.width, sourceHeight = imgNode.height;
+                    if (imgNode.width > imgNode.height) {
+                        sourceWidth = imgNode.height; sourceX = (imgNode.width - imgNode.height) / 2;
+                    } else if (imgNode.height > imgNode.width) {
+                        sourceHeight = imgNode.width; sourceY = (imgNode.height - imgNode.width) / 2;
+                    }
+                    ctx.drawImage(imgNode, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, 120, 120);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    input.setAttribute('data-img-src', compressedBase64); 
+                    input.previousElementSibling.innerText = "✓ PHOTO ADDED"; 
+                };
+                imgNode.src = e.target.result;
+            }; 
+            reader.readAsDataURL(file); 
+        } 
+    }
+
+    function syncColorFromPicker(picker, index) {
+        const card = picker.closest('.member-input-card');
+        const hexInput = card.querySelector('.hex-text-in');
+        const visualBar = card.querySelector('.color-bar-visual');
+        hexInput.value = picker.value;
+        visualBar.style.backgroundColor = picker.value;
+    }
+
+    function syncColorFromText(textInput, index) {
+        let val = textInput.value.trim();
+        if(!val.startsWith('#')) val = '#' + val;
+        if(/^#[0-9A-F]{6}$/i.test(val)) {
+            const card = textInput.closest('.member-input-card');
+            const picker = card.querySelector('.color-in');
+            const visualBar = card.querySelector('.color-bar-visual');
+            picker.value = val;
+            visualBar.style.backgroundColor = val;
+        }
+    }
+
+    function toggleSort(e) { if(e) e.preventDefault(); autoSort = !autoSort; const btn = document.getElementById('sort-btn'); btn.innerText = `AUTO-SORT: ${autoSort ? 'ON' : 'OFF'}`; btn.classList.toggle('btn-toggle-on', autoSort); }
+
+    function nextStep() {
+        document.getElementById('inputs').innerHTML = ''; 
+        let c = parseInt(document.getElementById('count').value || 6);
+        let h = '';
+        for(let i=0; i<c; i++) {
+            let color = crystalColors[i % crystalColors.length];
+            h += `<div class="member-input-card">
+                    <div style="display:flex; gap:10px; align-items: center;">
+                        <div class="color-container-block">
+                            <div class="color-bar-wrapper">
+                                <input type="color" class="color-in" value="${color}" oninput="syncColorFromPicker(this, ${i})">
+                                <div class="color-bar-visual" style="background-color: ${color};"></div>
+                            </div>
+                            <input type="text" class="hex-text-in" value="${color}" maxlength="7" oninput="syncColorFromText(this, ${i})">
+                        </div>
+                        <input type="text" placeholder="NAME" class="ni" style="flex:1; background:#0d0d0d; border:1px solid #333; color:#fff; padding:6px; font-weight:900;">
+                    </div>
+                    <input type="text" placeholder="POSITION" class="pi" style="background:#0d0d0d; border:1px solid #333; color:#aaa; padding:6px; font-size:11px;">
+                    <label class="photo-btn">+ ADD PHOTO</label>
+                    <input type="file" accept="image/*" class="img-file" style="display:none;" onchange="handleFile(this, ${i})">
+                  </div>`;
+        }
+        document.getElementById('inputs').innerHTML = h;
+        document.querySelectorAll('.photo-btn').forEach(btn => { btn.onclick = () => btn.nextElementSibling.click(); });
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+    }
+
+    function editSavedGroup(index) {
+        document.getElementById('inputs').innerHTML = ''; 
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        let targetGroup = arrayData[index];
+        if(!targetGroup) return;
+
+        window.currentEditingGroupIndex = index;
+        document.getElementById('count').value = targetGroup.members.length;
+
+        let h = `
+            <div style="display:flex; gap:8px; margin-bottom:15px; background:#1a1a1a; padding:10px; border-radius:6px; border:1px dashed #333;">
+                <button onclick="addMemberInEditor(event)" style="flex:1; background:#00E5FF; border:none; color:#000; font-weight:900; padding:8px; border-radius:4px; cursor:pointer; font-size:11px;">➕ ADD INTEGRANTE</button>
+                <button onclick="removeMemberInEditor(event)" style="flex:1; background:#FF0055; border:none; color:#fff; font-weight:900; padding:8px; border-radius:4px; cursor:pointer; font-size:11px;">➖ REM INTEGRANTE</button>
+            </div>
+            <div id="editor-members-list">
+        `;
+
+        targetGroup.members.forEach((m, i) => {
+            h += `
+                <div class="member-input-card editor-member-card">
+                    <div style="display:flex; gap:10px; align-items: center;">
+                        <div class="color-container-block">
+                            <div class="color-bar-wrapper">
+                                <input type="color" class="color-in" value="${m.color}" oninput="syncColorFromPicker(this, ${i})">
+                                <div class="color-bar-visual" style="background-color: ${m.color};"></div>
+                            </div>
+                            <input type="text" class="hex-text-in" value="${m.color}" maxlength="7" oninput="syncColorFromText(this, ${i})">
+                        </div>
+                        <input type="text" placeholder="NAME" class="ni" value="${m.name}" style="flex:1; background:#0d0d0d; border:1px solid #333; color:#fff; padding:6px; font-weight:900;">
+                    </div>
+                    <input type="text" placeholder="POSITION" class="pi" value="${m.pos || ''}" style="background:#0d0d0d; border:1px solid #333; color:#aaa; padding:6px; font-size:11px;">
+                    <label class="photo-btn">${m.img ? '✓ PHOTO ADDED' : '+ ADD PHOTO'}</label>
+                    <input type="file" accept="image/*" class="img-file" data-img-src="${m.img || ''}" style="display:none;" onchange="handleFile(this, ${i})">
+                </div>
+            `;
+        });
+        
+        h += `</div>`;
+        document.getElementById('inputs').innerHTML = h;
+        document.querySelectorAll('.photo-btn').forEach(btn => { btn.onclick = () => btn.nextElementSibling.click(); });
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+
+        setTimeout(() => {
+            let titleInput = document.getElementById('title-input');
+            if(titleInput) titleInput.value = targetGroup.title;
+        }, 50);
+    }
+
+    function addMemberInEditor(e) {
+        if(e) e.preventDefault();
+        let container = document.getElementById('editor-members-list');
+        if(!container) return;
+        let nextIdx = container.children.length;
+
+        let newCard = document.createElement('div');
+        newCard.className = "member-input-card editor-member-card";
+        newCard.innerHTML = `
+            <div style="display:flex; gap:10px; align-items: center;">
+                <div class="color-container-block">
+                    <div class="color-bar-wrapper">
+                        <input type="color" class="color-in" value="#ffffff" oninput="syncColorFromPicker(this, ${nextIdx})">
+                        <div class="color-bar-visual" style="background-color: #ffffff;"></div>
+                    </div>
+                    <input type="text" class="hex-text-in" value="#ffffff" maxlength="7" oninput="syncColorFromText(this, ${nextIdx})">
+                </div>
+                <input type="text" placeholder="NAME" class="ni" value="" style="flex:1; background:#0d0d0d; border:1px solid #333; color:#fff; padding:6px; font-weight:900;">
+            </div>
+            <input type="text" placeholder="POSITION" class="pi" value="" style="background:#0d0d0d; border:1px solid #333; color:#aaa; padding:6px; font-size:11px;">
+            <label class="photo-btn">+ ADD PHOTO</label>
+            <input type="file" accept="image/*" class="img-file" data-img-src="" style="display:none;" onchange="handleFile(this, ${nextIdx})">
+        `;
+        container.appendChild(newCard);
+        newCard.querySelector('.photo-btn').onclick = function() { this.nextElementSibling.click(); };
+        let countInput = document.getElementById('count');
+        if(countInput) countInput.value = container.children.length;
+    }
+
+    function removeMemberInEditor(e) {
+        if(e) e.preventDefault();
+        let container = document.getElementById('editor-members-list');
+        if(!container || container.children.length === 0) return;
+        let cards = container.querySelectorAll('.editor-member-card');
+        let listaNomes = Array.from(cards).map((card, idx) => {
+            let nameVal = card.querySelector('.ni')?.value || "SEM NOME";
+            return `${idx + 1}: ${nameVal}`;
+        }).join("\n");
+
+        let escolha = prompt(`DIGITE O NÚMERO DA INTEGRANTE QUE DESEJA REMOVER:\n\n${listaNomes}`);
+        let idxOriginal = parseInt(escolha) - 1;
+
+        if(!isNaN(idxOriginal) && idxOriginal >= 0 && idxOriginal < cards.length) {
+            let nameVal = cards[idxOriginal].querySelector('.ni')?.value || "integrante";
+            if(confirm(`TEM CERZEZA QUE DESEJA REMOVER ${nameVal}?`)) {
+                container.removeChild(cards[idxOriginal]);
+                let countInput = document.getElementById('count');
+                if(countInput) countInput.value = container.children.length;
+            }
+        }
+    }
+
+    function buildViewportDOM() {
+        document.getElementById('viewport').innerHTML = members.map(m => `
+            <div class="member-row" id="row-${m.id}" onpointerdown="tgl(${m.id})" style="--m-color: ${m.color}">
+                <div class="avatar-wrap">
+                    <div class="m-avatar" id="avatar-${m.id}" style="background-image: url('${m.img}')"></div>
+                    <span class="mic-icon" id="mic-${m.id}" onpointerdown="muteTgl(event, ${m.id})">➕️</span>
+                </div>
+                <div class="content-wrap">
+                    <div class="label-group">
+                        <div class="label-row">
+                            <span class="m-name" id="name-${m.id}">${m.name}</span>
+                            <div class="time-display" id="disp-${m.id}">
+                                <span id="box-${m.id}" style="padding: 2px 4px;">0.0</span>
+                                <span class="m-pct" id="pct-${m.id}">0.0%</span>
+                                <button class="edit-trigger-btn" onpointerdown="triggerEditTime(event, ${m.id})">⚙️</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" id="bar-${m.id}" style="background-color: ${m.color};"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function triggerEditTime(e, id) {
+        e.stopPropagation(); e.preventDefault();
+        let m = members.find(x => x.id === id);
+        if (!m) return;
+        currentEditingMemberId = id;
+        document.getElementById('custom-edit-title').innerText = `EDITAR TEMPO DE ${m.name}`;
+        document.getElementById('custom-edit-input').value = m.time.toFixed(1);
+        document.getElementById('custom-edit-modal').classList.remove('hidden');
+    }
+
+    function saveCustomEditTime() {
+        if (currentEditingMemberId !== null) {
+            let m = members.find(x => x.id === currentEditingMemberId);
+            if (m) {
+                let val = parseFloat(document.getElementById('custom-edit-input').value);
+                if (!isNaN(val) && val >= 0) m.time = val;
+            }
+        }
+        closeCustomEditTime();
+    }
+    function closeCustomEditTime() { document.getElementById('custom-edit-modal').classList.add('hidden'); currentEditingMemberId = null; }
+
+    function startEngine() {
+        let containerEditor = document.getElementById('editor-members-list');
+        let cards;
+        if (containerEditor && containerEditor.children.length > 0) {
+            cards = containerEditor.querySelectorAll('.editor-member-card');
+        } else {
+            cards = document.querySelectorAll('#inputs > .member-input-card');
+        }
+        
+        members = Array.from(cards).map((card, i) => {
+            const nameEl = card.querySelector('.ni');
+            const pickerEl = card.querySelector('.color-in');
+            const posEl = card.querySelector('.pi');
+            const photoEl = card.querySelector('.img-file');
+            
+            return {
+                id: i,
+                name: nameEl && nameEl.value.trim() ? nameEl.value.toUpperCase() : `MEMBER ${i+1}`,
+                pos: posEl ? posEl.value : "",
+                color: pickerEl ? pickerEl.value : crystalColors[i % crystalColors.length],
+                img: photoEl ? (photoEl.getAttribute('data-img-src') || "") : "",
+                time: 0, active: false, muted: false, posShown: false
+            }
+        });
+        
+        buildViewportDOM(); updateLineSizes(currentLineHeight);
+        document.getElementById('setup').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        lastTime = performance.now(); loop();
+    }
+
+    function tgl(id) {
+        let m = members.find(x => x.id === id);
+        if (!m || m.muted) return;
+        m.active = !m.active;
+        const rowNode = document.getElementById(`row-${id}`);
+        if(rowNode) rowNode.classList.toggle('active', m.active);
+        if (vocalPanelsMode) { 
+            const panelNode = document.getElementById(`vp-panel-${id}`);
+            if(panelNode) panelNode.classList.toggle('vp-active', m.active);
+        }
+    }
+
+    function muteTgl(e, id) {
+    if (e) {
+        e.stopPropagation(); // Já está no seu código (evita subir o clique)
+        e.preventDefault();  // ADICIONE ISSO AQUI! (bloqueia a abertura de links/sites)
+    }
+    
+    let m = members.find(x => x.id === id);
+    if (!m) return;
+    
+    m.muted = !m.muted;
+    // ... restante do seu código continua igual ...
+
+        const row = document.getElementById('row-' + id);
+        const mic = document.getElementById('mic-' + id);
+        row.classList.toggle('is-muted', m.muted);
+        mic.innerHTML = m.muted ? "➖️" : "➕️"; 
+        if (m.muted) { m.active = false; row.classList.remove('active'); }
+        if(vocalPanelsMode) { const panelNode = document.getElementById(`vp-panel-${id}`); if(panelNode) panelNode.classList.remove('vp-active'); }
+    }
+
+    function resetTimers(e) {
+        if(e) e.preventDefault();
+        members.forEach(m => { m.time = 0; m.active = false; m.muted = false; const mic = document.getElementById(`mic-${m.id}`); if(mic) mic.innerHTML = "➕️"; });
+        document.querySelectorAll('.member-row').forEach(r => r.classList.remove('active', 'is-muted'));
+        if(vocalPanelsMode) buildVocalPanelsDOM();
+    }
+
+    function wipeAll(e) {
+        if(e) e.preventDefault();
+        if(!confirm("REWORK?")) return;
+        if(activeLoop) cancelAnimationFrame(activeLoop);
+        document.getElementById('inputs').innerHTML = ''; 
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('setup').classList.remove('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        vocalPanelsMode = false; showPieChart = false; showDockPanel();
+        document.getElementById('sdv-btn').innerText = "DISPLAY SDV: OFF";
+        document.getElementById('sdv-btn').classList.remove('btn-toggle-on');
+        document.getElementById('pie-stage').classList.add('pie-hidden');
+        document.getElementById('vocal-panel-toggle-btn').classList.remove('btn-toggle-on');
+        document.getElementById('vocal-tap-panels-container').classList.add('hidden');
+        const v = document.getElementById('bg-video');
+        v.pause(); v.removeAttribute('src'); v.load();
+        document.getElementById('bg-video-container').style.display = 'none';
+        document.getElementById('video-manual-bar').style.display = 'none';
+        renderMainSetupSaves();
+    }
+
+        function drawPieChart(ctx, centerX, centerY, radius, total) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        let useUniformSlices = total < 0.01;
+        let rankedSlices = [...members];
+        if (!useUniformSlices) rankedSlices.sort((a, b) => b.time - a.time);
+
+        let startAngle = -Math.PI / 2;
+        
+        // Configurações da borda preta separadora
+        ctx.strokeStyle = "#000"; // Cor igual ao fundo do app
+        ctx.lineWidth = 1;            // Espessura da borda separadora
+
+        rankedSlices.forEach(m => {
+            let sliceAngle = useUniformSlices ? (2 * Math.PI / rankedSlices.length) : (m.time / total) * (2 * Math.PI);
+            if (sliceAngle <= 0) return;
+            let endAngle = startAngle + sliceAngle;
+            
+            // Desenha a fatia preenchendo a cor
+            ctx.beginPath(); 
+            ctx.moveTo(centerX, centerY); 
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle); 
+            ctx.closePath(); 
+            ctx.fillStyle = m.color; 
+            ctx.fill();
+            
+            // Desenha a linha de contorno preta para separar as fatias
+            ctx.stroke();
+            
+            startAngle = endAngle;
+        });
+
+        // EFEITO DONUT (Faz o furo perfeito no centro do gráfico)
+        ctx.beginPath();
+        // O raio do furo interno será 32 pixels (ajuste se quiser mais grosso ou fino)
+        ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fillStyle = "#000000"; // Cor preta idêntica ao fundo da tela
+        ctx.fill();
+    }
+
+
+    function loop() {
+        let now = performance.now();
+        let dt = ((now - lastTime) / 1000) * currentSpeed;
+        lastTime = now;
+        members.forEach(m => { if(m.active && !m.muted) m.time += dt; });
+        let total = members.reduce((a, b) => a + b.time, 0) || 0;
+        let targetMax = showMax && manualMax > 0 ? manualMax : Math.max(...members.map(m => m.time), 0.1);
+
+        if (showPieChart) {
+            const canvas = document.getElementById('pieChart');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                let dpr = window.devicePixelRatio || 1;
+                if(canvas.width !== 130 * dpr) { canvas.width = 130 * dpr; canvas.height = 130 * dpr; ctx.scale(dpr, dpr); }
+                drawPieChart(ctx, 65, 65, 60, total);
+            }
+        }
+
+        let displayOrder = [...members];
+        if (autoSort) displayOrder.sort((a, b) => b.time - a.time);
+
+        displayOrder.forEach((m, i) => {
+            let r = document.getElementById(`row-${m.id}`);
+            if(!r) return;
+            document.getElementById(`box-${m.id}`).innerText = m.time.toFixed(1);
+            document.getElementById(`pct-${m.id}`).innerText = (total > 0.01 ? ((m.time/total)*100).toFixed(1) : "0.0") + "%";
+            document.getElementById(`pct-${m.id}`).style.color = '#d2d2d2'; 
+            
+            let barFill = document.getElementById(`bar-${m.id}`);
+            let calculatedWidth = Math.min((m.time / targetMax) * 100, 100);
+            
+            barFill.style.width = calculatedWidth + "%";
+            
+            if (calculatedWidth <= 0) {
+                barFill.style.opacity = "0";
+            } else {
+                barFill.style.opacity = "1";
+            }
+            
+            r.style.transform = `translate3d(0, ${(autoSort ? i : m.id) * currentLineHeight}px, 0)`;
+        });
+        activeLoop = requestAnimationFrame(loop);
+    }
+
+    function makeCombinedLine() {
+        if(selectedLineGroups.length === 0) { alert("SELECIONE PELO MENOS 1 GRUPO ⭐️"); return; }
+        let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+        let arrayData = rawData ? JSON.parse(rawData) : [];
+        let combinedMembers = [];
+
+        selectedLineGroups.forEach(i => {
+            if(arrayData[i]) {
+                arrayData[i].members.forEach(m => {
+                    combinedMembers.push({
+                        id: combinedMembers.length, name: m.name, pos: m.pos, color: m.color, img: m.img, time: 0, active: false, muted: false, posShown: false
+                    });
+                });
+            }
+        });
+
+        if(combinedMembers.length === 0) { alert("NENHUM MEMBRO ENCONTRADO 💔"); return; }
+        members = combinedMembers;
+        if(activeLoop) cancelAnimationFrame(activeLoop);
+        document.getElementById('title-input').value = "COMBINED LINE";
+        document.getElementById('setup').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        document.getElementById('save-group-creator').classList.add('hidden');
+        document.getElementById('save-manager-dialog').classList.add('hidden');
+        buildViewportDOM(); updateLineSizes(currentLineHeight);
+        lastTime = performance.now(); loop();
+        selectedLineGroups = [];
+    }
+    </script>
+</body>
+</html>
