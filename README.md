@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,8 +7,8 @@
     <title>LINE DISTRIBUTION</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@900&family=Poppins:wght@900&family=Roboto:wght@900&family=Oswald:wght@700&family=Syncopate:wght@700&family=Cinzel:wght@900&family=Orbitron:wght@900&family=Anton&family=Permanent+Marker&family=Space+Grotesk:wght@700&family=Righteous&family=Rubik+Mono+One&family=Quicksand:wght@700&family=Fredoka:wght@700&family=Inter:wght@900&display=swap" rel="stylesheet">
-     <style> 
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@900&family=Poppins:wght@900&family=Roboto:wght@600;900&family=Oswald:wght@700&family=Syncopate:wght@700&family=Cinzel:wght@900&family=Orbitron:wght@900&family=Anton&family=Permanent+Marker&family=Space+Grotesk:wght@700&family=Righteous&family=Rubik+Mono+One&family=Quicksand:wght@700&family=Fredoka:wght@700&family=Inter:wght@900&display=swap" rel="stylesheet">
+  <style> 
        body {
             background: #000; color: #fff; font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 500;
             margin: 0; height: 100vh; display: flex; flex-direction: column;
@@ -36,11 +37,11 @@
         }
 
         #title-header { 
-            background: rgba(255, 255, 255, 0.03); border: 1px solid #1a1a1a; padding: 6px 20px; border-radius: 4px; width: 85%; max-width: 500px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid #250065; padding: 6px 20px; border-radius: 4px; width: 85%; max-width: 500px;
         }
 
         #title-input {
-            width: 100%; background: transparent; border: none; color: #adff2f; font-size: 13px; letter-spacing: 2px; font-family: inherit; font-weight: 900; text-align: center; text-transform: uppercase; outline: none;
+            width: 100%; background: transparent; border: none; color: #6100ff; font-size: 13px; letter-spacing: 2px; font-family: inherit; font-weight: 900; text-align: center; text-transform: uppercase; outline: none;
         }
 
         #pie-stage {
@@ -48,72 +49,232 @@
         }
         #pie-stage.pie-hidden { opacity: 0; max-height: 0px; padding: 0px; pointer-events: none; }
         #pie-canvas-wrapper { width: 130px; height: 130px; position: relative; }
-        #pieChart { width: 100% !important; height: 100% !important; }
+        #pieChart { width: 130px !important; height: 130px !important; display: block;
+        }
 
         #viewport-container { 
-            width: 100%; flex: 1; display: flex; justify-content: center; box-sizing: border-box; padding: 0 15px; overflow-y: auto !important; -webkit-overflow-scrolling: touch; margin-bottom: 5px;
+            width: 100%; flex: 1; display: flex; justify-content: center; box-sizing: border-box; padding: 0 25px; overflow-y: auto !important; -webkit-overflow-scrolling: touch; margin-bottom: 5px;
         }
         #viewport { 
-            width: 100%; max-width: 650px; position: relative; margin: 20px auto; height: 100%; --row-height: 54px;
+            width: 90%; max-width: 450px; position: relative; margin: 60px auto; height: 100%; --row-height: 70px;
         }
 
         .member-row {
-            position: absolute; width: 100%; height: var(--row-height); display: flex; align-items: center; padding: 0 10px; transition: transform 0.8s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.3s ease; box-sizing: border-box; will-change: transform; touch-action: none; user-select: none; overflow: visible !important; /* Libera o brilho para todos os temas */
+            position: absolute; width: 100%; height: var(--row-height); display: flex; align-items: center; padding: 0 19px; transition: transform 7s cubic-bezier(0.2, 1, 0.2, 1), opacity 0.3s ease; box-sizing: border-box; will-change: transform; touch-action: none; user-select: none; overflow: visible !important; /* Libera o brilho para todos os temas */
         }
        
         .active { z-index: 100 !important; }
-        .is-muted { opacity: 0.3 !important; }
 
+    /* Remove a opacidade global que quebrava os pixels e o 3D */
+.is-muted { 
+    opacity: 0.5 !important; /* Mantém 1 para não pixelar */
+}
+
+/* Apaga suavemente apenas os elementos internos, sem bugar a renderização */
+.is-muted .m-avatar {
+    brightness(0.6) !important; /* Deixa o avatar cinza e escurinho */
+}
+
+.is-muted .m-name,
+.is-muted .time-display,
+.is-muted .pct-display,
+.is-muted. bar-fill {
+    color: rgba(255, 255, 255, 0.3) !important; /* Texto foca mais transparente e nítido */
+    opacity: 0.3 !important; /* Aplicar opacidade nos elementos menores separados não quebra o renderizador do navegador */
+}
+
+
+
+.member-row.active {
+    z-index: 9999 !important;
+    isolation: auto;
+    transform: translate3d(0, 0, 1px); 
+}
          
-        .avatar-wrap { position: relative; flex-shrink: 0; margin-right: 12px; }
-        .m-avatar {
-            width: calc(var(--row-height) * 0.8); height: calc(var(--row-height) * 0.8); border-radius: 50%; border: 5px solid #000; background: #151515; background-size: cover; background-position: center; box-sizing: border-box;
-        }
-        .active .m-avatar { border-color: #fff; border-width: 5px; box-shadow: 0 0 18px var(--m-color); }
 
-        .mic-icon {
-            position: absolute; bottom: -6px; right: -8px; font-size: 11px; z-index: 110; filter: drop-shadow(0 0 3px #000); padding: 6px; cursor: pointer; pointer-events: auto;
-        }
-        .custom-mute-icon { width: 13px; height: 13px; background: #ff4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .custom-mute-line { width: 8px; height: 2px; background: #fff; }
 
-        .content-wrap { flex: 1; display: flex; flex-direction: column; position: relative; height: var(--row-height); justify-content: center; pointer-events: none; }
-        .label-group { display: flex; flex-direction: column; }
-        
-        .m-pos { font-size: 9px; color: #666; font-weight: 900; margin-bottom: 2px; display: block; text-transform: uppercase; }
-        .label-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px; }
-        .m-name { font-size: 13px; letter-spacing: 0.5px; color: #fff; }
-        
-        .time-display { font-size: 11px; font-variant-numeric: tabular-nums; color: #888; display: flex; gap: 6px; align-items: center; pointer-events: auto; }
-        .m-pct { font-size: 10px; color: #555; }
-        
-        .edit-trigger-btn {
-            font-size: 11px; padding: 4px 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-        }
-        .edit-trigger-btn:active { background: rgba(255,255,255,0.25); }
-        
-        .active .m-name { color: #fff; text-shadow: 0 0 5px var(--m-color); }
-        .active .time-display { color: #fff; }
 
-        .bar-fill {
-            position: absolute; left: 0; top: 0; height: 50%; width: 0%;
-            transition: width 0.1s linear; background: #fff; border-radius: 0 20px 20px 0;
-        }
+/* Remove qualquer deformação da avatar-box que causou o formato de ovo */
+.avatar-box {
+    width: auto !important;
+    height: auto !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
 
-        .active .bar-fill { box-shadow: 0 0 1px #fff, 0 0 3px var(--m-color); }
-        .active .bar-fill::after {
-            content: ""; position: absolute; inset: 0; border-radius: inherit;
-            background: inherit; filter: blur(8px); opacity: 0.8;
-            animation: glowPulse 0.8s infinite alternate;
-        }
 
-        @keyframes glowPulse {
-            from { opacity: 0.4; transform: scaleX(1); }
-            to { opacity: 1; transform: scaleX(1.03); }
-        }
+/* 2. O m-avatar (A imagem real - o tamanho fica travado aqui!) */
+.m-avatar {
+    /* Define o tamanho fixo exato do círculo aqui */
+    width: calc(var(--row-height) * 0.68) !important; 
+    height: calc(var(--row-height) * 0.68) !important; 
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: block !important;
+    
+    /* Joga a borda para fora sem amassar a foto */
+    box-sizing: content-box !important; 
+    
+    /* Borda sutil padrão */
+    border: 0.0px solid #000 !important; 
+    
+    transition: transform 0.25s cubic-bezier(0.2, 1, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+/* ==================== ESTADO ATIVO PADRÃO ==================== */
+.active .m-avatar {
+    transform: scale(1.15) !important;
+    border-color: #fff !important; 
+    border-width: 6px !important;
+    box-shadow: 0 0 20px var(--m-color) !important; 
+    box-sizing: content-box; 
+    transition-delay: 0.05s !important;
+}
+
+
+.m-name { 
+    font-size: 15px; letter-spacing: 0.5px; color: #fff; 
+    /* Prepara o nome para a transição suave do neon */
+    transition: text-shadow 0.5s ease, color 0.25s ease;
+}
+
+.time-display { 
+    font-size: 14px; font-variant-numeric: tabular-nums; color: #888; 
+    display: flex; gap: 8px; align-items: center; pointer-events: auto; 
+    /* Prepara o tempo para a transição suave */
+    transition: color 0.25s ease;
+}
+
+.bar-fill {
+    position: absolute; left: 0; top: 0; height: 40%; width: 0%;
+    transition: width 0.0s linear; background: #fff; border-radius: 0 20px 20px 0;
+    transform-origin: left !important;
+}
+
+
+/* ==================== 2. ESTADOS ATIVOS (COM DELAY DE 0.05s) ==================== */
+
+/* Nome da integrante ativo */
+.active .m-name { 
+    color: #fff !important; 
+    text-shadow: 0 0 5px #fff, 0 0 12px var(--m-color) !important; 
+    transition-delay: 0.05s !important; /* Espera o delay curto */
+}
+
+/* Exibição de tempo ativo */
+.active .time-display { 
+    color: #fff !important; 
+    transition-delay: 0.05s !important; 
+}
+
+/* 1. Wrapper do Avatar (Estrelinhas no centro perfeito) */
+.avatar-wrap { 
+    position: relative !important; 
+    flex-shrink: 0; 
+    margin-right: 15px; 
+    overflow: visible !important; 
+    z-index: 10;
+    
+    /* Deixa o flexbox ativo para as estrelas ficarem lindas e centralizadas */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    
+    /* Mantém o tamanho exato da idol */
+    width: calc(var(--row-height) * 0.68) !important;
+    height: calc(var(--row-height) * 0.68) !important;
+}
+
+/* O Microfone Padrão */
+.mic-icon {
+    position: absolute !important;
+    z-index: 9999 !important; /* Aumentado para garantir que fica à frente de tudo */
+    bottom: -13px !important;
+    right: -32px !important;
+    
+    /* Tamanho visual do desenho */
+    width: 19px !important;
+    height: 19px !important;
+    
+    /* Cria a bolha de clique invisível */
+    padding: 15px !important; /* Aumentado para 15px para dar ainda mais área */
+    box-sizing: content-box !important;
+    
+    /* Garante que o cursor do rato muda para a mão de clique ao passar por toda a área invisível */
+    cursor: pointer !important; 
+    pointer-events: auto !important;
+
+    color: #ffffff !important;
+    margin: 0 !important;
+    transform: scale(1) !important;
+    transform-origin: center center !important;
+    transition: transform 0.25s cubic-bezier(0.2, 1, 0.2, 1), color 0.25s ease, filter 0.25s ease !important;
+}
+
+
+    
+/* 2. O Microfone Ativo (Brilha na cor da integrante + mantém o contorno preto!) */
+.active .mic-icon {
+    /* O microfone muda para a cor personalizada da idol */
+    color: #fff !important; 
+    
+    transform: scale(1) !important;
+    
+
+    transition-delay: 0.05s !important;
+}
+
+
+/* Barra ativa */
+.active .bar-fill { 
+    box-shadow: 0 0 2px #fff, 0 0 6px var(--m-color); 
+    /* Opcional: Adicione se quiser que a barra física espere para aparecer o box-shadow */
+    transition: box-shadow 0.25s ease;
+    transition-delay: 0.05s !important;
+}
+
+/* Onda neon da barra (O ::after começa a correr com o delay) */
+.active .bar-fill::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+    background-size: 200% 100%; 
+    filter: blur(6px); opacity: 0.9;
+    animation: ondaNeon 2s infinite linear !important;
+    
+    /* Faz a onda respeitar o delay antes de surgir na tela */
+    animation-delay: 0.75s !important; 
+}
+
+
+/* ==================== 3. ANIMAÇÕES OUTROS (Resto do seu código) ==================== */
+.custom-mute-icon { width: 13px; height: 13px; background: #ff4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.custom-mute-line { width: 8px; height: 2px; background: #fff; }
+.content-wrap { flex: 1; display: flex; flex-direction: column; position: relative; height: var(--row-height); justify-content: center; pointer-events: none; padding-left: 6px;}
+.label-group { display: flex; flex-direction: column; }
+.m-pos { font-size: 9px; color: #fff; font-weight: 900; margin-bottom: 2px; display: block; text-transform: uppercase; }
+.label-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px; }
+.m-pct { font-size: 11px; font-weight: 700; color: #fff; letter-spacing: 0.5px;}
+.edit-trigger-btn { font-size: 11px; padding: 4px 6px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); border-radius: 4px; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;}
+.edit-trigger-btn:active { background: rgba(255,255,255,0.5); }
+
+
+/* 3. O Keyframe que move o brilho sempre para a frente */
+@keyframes ondaNeon {
+    from {
+        background-position: 200% 0; /* Começa fora da barra na esquerda */
+    }
+    to {
+        background-position: -200% 0; /* Termina fora da barra na direita */
+    }
+}
+
 
         .bar-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.00); border-radius: 0 90px 90px 0; overflow: visible; position: relative; }
 
+       
+        body.theme-neon .bar-fill { background-color: var(--m-color) !important;  border: none !important;  box-shadow: none !important;  height: 110% !important; }
         body.theme-neon .active .bar-fill { box-shadow: 0 0 2px #fff, 0 0 4px var(--m-color), 0 0 8px var(--m-color); }
         body.theme-neon .active .m-name { text-shadow: 0 0 12px var(--m-color), 0 0 5px #fff; }
       
@@ -121,7 +282,7 @@
         body.theme-cyberpunk .bar-fill { border-radius: 0; border-right: 3px solid #fff; box-shadow: 0 0 15px var(--m-color); }
         body.theme-cyberpunk .m-avatar { border-radius: 0px !important; }
 
-        body.theme-glow. bar-bg { background: #000; }
+        body.theme-glow .bar-bg { background: #000; }
         body.theme-glow .bar-fill { filter: blur(0.5px); box-shadow: 0 0 17px 3px var(--m-color), 0 0 3px #fff; }
         body.theme-glow .active .m-name { text-shadow: 0 0 12px var(--m-color), 0 0 5px #fff; }
 
@@ -148,66 +309,55 @@ body.theme-m-color .bar-fill {
 }
 
        body.theme-m-color .active .bar-fill { 
-    background-color: color-mix(in srgb, var(--m-color) 80%, #ffffff 20%) !important; 
+    background-color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important; 
 }
 
 
 body.theme-m-color .active .m-name { 
-    color: color-mix(in srgb, var(--m-color) 50%, #ffffff 50%) !important; 
+    color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important; 
 }
 
-/* Isso vai pegar o texto do tempo, da porcentagem e QUALQUER ícone/engrenagem que esteja lá dentro */
 body.theme-m-color .active .time-display,
 body.theme-m-color .active .m-pct,
 body.theme-m-color .active .time-display *,
 body.theme-m-color .active .m-pct * { 
-    color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
-    -webkit-text-fill-color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+    color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important;
+    -webkit-text-fill-color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important;
 }
 
 body.theme-m-color .active .m-avatar {
-    border: 5px solid color-mix(in srgb, var(--m-color) 60%, #ffffff 40%) !important;
-    border-radius: 50% !important;
-    box-sizing: content-box !important;
-    overflow: visible !important; /* Garante que o brilho apareça para fora */
+    border-color: var(--m-color) !important; box-shadow: 0 0 20px var(--m-color) !important; 
 }
 
-/* Aplica o GLOW perfeito e esfumaçado direto na foto da integrante */
 body.theme-m-color .active .m-avatar img {
-    border-radius: 50% !important;
-    box-shadow: 0 0 20px 5px color-mix(in srgb, var(--m-color) 80%, #ffffff 20%) !important;
+    border-radius: 40% !important;
+    box-shadow: 0 0 20px 5px color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important;
 }
 
        
-       /* 1. Como ele fica normal (apagado) */
 body.theme-m-color .box-display {
     color: #52525b !important;
 }
 
-/* 2. Como ele fica quando está ATIVO (aceso com o color-mix) */
 body.theme-m-color .active .box-display { 
-    color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important; 
+    color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important; 
 }
 
-/* ==========================================
-   TESTE FORÇADO PARA A ENGRENAGEM ATIVA
-   ========================================== */
 
-/* 1. Pinta o ícone da engrenagem (seja SVG, FontAwesome ou texto) */
+       
 body.theme-m-color .active button,
 body.theme-m-color .active button i,
 body.theme-m-color .active .edit-time,
 body.theme-m-color .active .settings-btn,
 body.theme-m-color .active [class*="gear"],
 body.theme-m-color .active [class*="edit"] {
-    color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
-    -webkit-text-fill-color: color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+    color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important;
+    -webkit-text-fill-color: color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important;
 }
 
-/* 2. Opcional: Se quiser que o quadradinho de fundo dela também mude de cor */
 body.theme-m-color .active button {
     background-color: #000 !important;
-    border: 1px solid color-mix(in srgb, var(--m-color) 70%, #ffffff 30%) !important;
+    border: 1px solid color-mix(in srgb, var(--m-color) 100%, #ffffff 0%) !important;
 }
 
 
@@ -224,7 +374,7 @@ body.theme-orange .bar-fill {
     background-color: #FFCFDC !important; 
     background: #FFCFDC !important;      
     border: none !important;                  
-    height: 60% !important;                  
+    height: 55% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
     box-shadow: 0 1px 0px 1px #D86884 !important; 
@@ -240,6 +390,18 @@ body.theme-orange .active .bar-fill {
                 0 0 20px #FF005d,
                 0 0 20px #FF005D !important; 
 }
+
+  
+body.theme-orange .mic-icon {
+    color: #FFCFDC !important; 
+    filter: drop-shadow(0 0 1px #FF005D) !important; 
+}
+
+body.theme-orange .mic-icon.muted-active {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(0 0 3px #FF005D) drop-shadow(0 0 4px #D86884) !important; 
+}
+
 
 body.theme-orange .m-name,
 body.theme-orange .box-display,    
@@ -261,9 +423,195 @@ body.theme-orange .active .time-display {
     text-shadow: 0 0 4px #FF69B4 !important; 
 }
 
-body.theme-orange .active .m-avatar { border-color: #FFFFFF !important; box-shadow: 0 0 20px #FF005d !important; }
+/* Borda do Avatar Ativo */
+body.theme-orange .active .m-avatar {
+    border: 5px solid #FFFFFF !important; 
+    border-radius: 50% !important; 
+    box-sizing: content-box !important; 
+    
+    box-shadow: 0 0 5px #FFFFFF,
+                0 0 8px #FF005D,     
+                0 0 25px #FF005D !important;
+}
 body.theme-orange .active .m-name { color: #FFFFFF !important; text-shadow: 0 0 20px #FF005d !important; }
 body.theme-orange .active .time-display { color: #FFFFFF !important; text-shadow: 0 0 12px #FF005d !important; }
+
+    /* --- TEMA GRAY (ESTILO NEON GLOW DA IMAGEM) --- */
+
+body.theme-gray .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-gray .bar-fill { 
+    background-color: #F2BAC1 !important; 
+    background: #F2BAC1 !important;      
+    border: none !important;                  
+    height: 55% !important;                  
+    position: relative;
+    border-radius: 0px 6px 6px 0px !important;
+    box-shadow: 0px 1px 0px 1px #24B1A7 !important; 
+}
+
+        /* Brilho neon forte na barra ativa (Ciano domina, rosa fica na bordinha) */
+body.theme-gray .active .bar-fill { 
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border: none !important; 
+    border-radius: 0px 6px 6px 0px !important;
+    
+    box-shadow: 0px 1px 0px 1px #FFFFFF
+                0 0 8px #FF205F,     /* Rosa bem coladinho na barra */
+                0 0 20px #24B1A7,    /* Azul forte expandindo */
+                0 0 35px #24B1A7 !important; /* Azul gigante para dominar */
+ 
+}
+    
+/* Nomes e tempos normais (inativos) */
+body.theme-gray .m-name,
+body.theme-gray .box-display,    
+body.theme-gray .time-display,
+body.theme-gray .pct-display {   
+    color: #F2BAC1 !important;
+    text-shadow: -0.5px -0.5px 0 #24B1A7,  
+                  0.5px -0.5px 0 #24B1A7,
+                 -0.5px  0.75px 0 #F2BAC1,
+                  0.75px  0.75px 0 #24B1A7 !important; 
+}
+
+    /* --- MICROFONE NO TEMA GRAY --- */
+
+/* Microfone normal (Não mutado) */
+body.theme-gray .mic-icon {
+    color: #E8DADE !important; /* Rosa suave padrão */
+    filter: drop-shadow(0 0 5px #24B1A7) !important; /* Sombra neon ciano */
+}
+
+/* Quando o membro está mutado */
+body.theme-gray .mic-icon.muted-active {
+    color: #FFFFFF !important; /* Branco brilhante */
+    filter: drop-shadow(0 0 8px #F2BAC1) drop-shadow(0 0 15px #24B1A7) !important; /* Brilho neon duplo */
+}
+
+
+
+/* Nome Ativo */
+body.theme-gray .active .m-name { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 3px #FFFFFF,
+                 0 0 6px #FF205F,     /* Rosa suave perto da letra */
+                 0 0 15px #24B1A7,    /* Azul expandido */
+                 0 0 25px #24B1A7 !important; /* Azul dominante */
+}
+
+/* Tempo Ativo */
+body.theme-gray .active .time-display,
+body.theme-gray .active .time-display span { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 3px #FFFFFF,
+                 0 0 6px #FF205F,     /* Rosa suave perto do número */
+                 0 0 15px #24B1A7,    /* Azul expandido */
+                 0 0 25px #24B1A7 !important; /* Azul dominante */
+}
+
+/* Borda do Avatar Ativo */
+body.theme-gray .active .m-avatar {
+    border: 5px solid #FFFFFF !important; 
+    border-radius: 50% !important; 
+    box-sizing: content-box !important; 
+    
+    box-shadow: 0 0 5px #FFFFFF,
+                0 0 8px #FF205F,     /* Rosa logo após a borda branca */
+                0 0 25px #24B1A7,     /* Azul forte saindo */
+                0 0 45px #24B1A7 !important; /* Brilho azul gigante de fundo */
+}
+
+
+          body.theme-yellow .bar-bg { 
+    background-color: transparent !important; 
+    background: transparent !important;       
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; 
+}
+
+body.theme-yellow .bar-fill { 
+    background: linear-gradient(90deg, #FFCA39, #FFF2A6) !important;
+    height: 8px !important;
+    position: relative;
+    border-radius: 0 999px 999px 0 !important;
+
+    box-shadow: 
+        0 0 6px rgba(255, 202, 57, 0.6),
+        0 0 14px rgba(255, 202, 57, 0.3);
+
+    transform: translateZ(0);
+    transition: width 0.15s ease, filter 0.2s ease;
+}
+
+       body.theme-yellow .bar-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+
+    background: inherit;
+    filter: blur(6px);
+    opacity: 0.6;
+
+    transform: scaleY(1.4);
+       }
+
+body.theme-yellow .active .bar-fill { 
+    background: linear-gradient(90deg, #FFFFFF, #FFCA39) !important;
+
+    box-shadow: 
+        0 0 6px #FFFFFF,
+        0 0 12px #FF0059,
+        0 0 25px #FF0059,
+        0 0 40px rgba(255, 0, 89, 0.6);
+
+    filter: brightness(1.2);
+}
+
+body.theme-yellow .m-name,
+body.theme-yellow .box-display,    
+body.theme-yellow .time-display,
+body.theme-yellow .pct-display {   
+    color: #FFCA39 !important;
+    text-shadow: -0.5px -0.5px 0 #FFF200,  
+                  0.5px -0.5px 0 #FFF200,
+                 -0.5px  0.75px 0 #FF4488,
+                  0.75px  0.75px 0 #FF4488 !important; 
+}
+
+    
+body.theme-yellow .mic-icon {
+    color: #FFFF00 !important; 
+    filter: drop-shadow(0 0 5px #FF4488) !important; 
+}
+
+body.theme-yellow .mic-icon.muted-active {
+    color: #FFFF00 !important; 
+    filter: drop-shadow(0 0 8px #FF4488) drop-shadow(0 0 15px #FF4488) !important; 
+}
+
+
+body.theme-yellow .active .m-name { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 10px #FF3700 !important; 
+}
+body.theme-yellow .active .time-display { 
+    color: #FFFFFF !important; 
+    text-shadow: 0 0 4px #FF3700 !important; 
+}
+
+body.theme-yellow .active .m-avatar { border-color: #FFFFFF !important; box-shadow: 0 0 20px #FF3700 !important; }
+body.theme-yellow .active .m-name { color: #FFFFFF !important; text-shadow: 0 0 20px #FF3700 !important; }
+body.theme-yellow .active .time-display { color: #FFFFFF !important; text-shadow: 0 0 12px #FF3700 !important; }
 
 body.theme-icon .bar-bg { 
     background-color: transparent !important; 
@@ -294,6 +642,7 @@ body.theme-icon .active .bar-fill {
     border-radius: 0px 4px 4px 0px !important;
 }
 
+
 body.theme-icon .m-name,
 body.theme-icon .time-display,
 body.theme-icon .pct-display {
@@ -307,6 +656,23 @@ body.theme-icon .active .pct-display {
     color: #FFFFFF !important;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important; 
 }
+
+body.theme-icon .mic-icon {
+    color: rgba(255, 255, 255, 0.5) !important; 
+    filter: rgba(255,255,255,0.05) !important; 
+}
+
+body.theme-gray .active .mic-icon {
+    color: #FFFFFF !important;
+    filter: drop-shadow(0 0 8px #666) drop-shadow(0 0 15px #666) !important;
+}
+  
+
+body.theme-icon .mic-icon.muted-active {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(0 0 0px #666) drop-shadow(0 0 0px #666) !important; 
+}
+
 
 body.theme-icon .active .m-avatar { 
     border-color: #fff; border-width: 5px; box-shadow: 0 0 18px var(--m-color); 
@@ -324,7 +690,7 @@ body.theme-cyberneon .bar-fill {
     background: #fff !important;      
     border: none !important;                  
     box-shadow: 0 1px 0px 1px #444 !important; 
-    height: 70% !important; 
+    height: 90% !important; 
     border-radius: 0px 6px 6px 0px !important;
 }
 
@@ -332,11 +698,13 @@ body.theme-cyberneon .active .bar-fill {
     background-color: #FFFF00 !important; 
     background: #FFFF00 !important;
     border: none !important; 
-    border-radius: 0px 2px 2px 0px !important;
+    border-radius: 0px 20px 20px 0px !important;
     box-shadow: 0 1px 0px 1px #878700, 
                 0 0 1px #878700, 
                 0 0 1px #878700 !important; 
 }
+
+        
 
 body.theme-cyberneon .active .m-name,
 body.theme-cyberneon .active .time-display,
@@ -344,10 +712,25 @@ body.theme-cyberneon .active .pct-display {
     color: #FFFF00 !important;
     text-shadow: 0 0 25px #878700 !important;
 }
-body.theme-cyberneon .active .m-avatar { 
-    border-color: #ffff00; border-width: 5px; box-shadow: 0 0 18px var(--m-color); 
-    box-shadow: 0 0 25px #878700 !important;
+body.theme-cyberneon .mic-icon {
+    color: #FFF !important; 
+    filter: drop-shadow(0 0 1px #FFF) !important; 
 }
+
+    body.theme-cyberneon .active .mic-icon {
+    color: #FFFF00 !important;
+    filter: drop-shadow(0 0 1px #ffff00) drop-shadow(0 0 2px #ffff00) !important;
+}
+
+body.theme-cyberneon .mic-icon.muted-active {
+    color: #FFF !important; 
+    filter: drop-shadow(0 0 1px #FFF) drop-shadow(0 0 1px #FFF) !important; 
+}
+     
+body.theme-cyberneon .active .m-avatar { 
+  border-color: #FFFF00 !important; 
+  box-shadow: 0 0 20px #FFFF00 !important; }
+
 
 body.theme-glassmorphism .bar-bg { 
     background-color: transparent !important; 
@@ -362,7 +745,7 @@ body.theme-glassmorphism .bar-fill {
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(4px) !important;
     box-shadow: none !important;
-    height: 70% !important; 
+    height: 90% !important; 
     border-radius: 0px 4px 4px 0px !important;
 }
 
@@ -374,11 +757,22 @@ body.theme-glassmorphism .active .bar-fill {
     box-shadow: 0 0 15px rgba(209, 179, 255, 0.6) !important; 
 }
 
+
 body.theme-glassmorphism .m-name,
 body.theme-glassmorphism .time-display,
 body.theme-glassmorphism .pct-display {
     color: rgba(255, 255, 255, 0.4) !important;
     text-shadow: none !important;
+}
+
+    body.theme-glassmorphism .mic-icon {
+    color: linear-gradient(90deg, FFA8B4 0%, #D1B3FF 100% ) !important; 
+    filter: drop-shadow(0 0 1px #FFA8B4) !important; 
+}
+
+body.theme-glassmorphism .mic-icon.muted-active {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(0 0 2px #D1B3FF) drop-shadow(0 0 5px #FFA8B4) !important; 
 }
 
 body.theme-glassmorphism .active .m-name,
@@ -395,25 +789,31 @@ body.theme-glassmorphism .active .pct-display {
 
 body.theme-glassmorphism .active .m-avatar {
     position: relative !important;
-    border: none !important; 
+    border-radius: 50% !important;
     box-shadow: 0 0 8px rgba(209, 179, 255, 0.4) !important;
+    
+    border: 5px solid transparent !important;
+    background-image: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)), linear-gradient(90deg, #FFA8B4, #D1B3FF) !important;
+    background-origin: border-box !important;
+    background-clip: content-box, border-box !important;
 }
 
 body.theme-glassmorphism .active .m-avatar::before {
-    content: "" !important;
-    position: absolute !important;
-    top: -3px !important;
-    left: -3px !important;
-    right: -3px !important;
-    bottom: -3px !important;
-    background: linear-gradient(90deg, #FFA8B4, #D1B3FF) !important;
-    border-radius: 50% !important;
-    z-index: -1 !important; 
+    display: none !important;
 }
 
-       /* ==========================================================================
-   TEMA: CYBERPUNK (INSPIRADO)
-   ========================================================================== */
+body.theme-glassmorphism .avatar-box { position: relative; display: inline-block; }
+body.theme-glassmorphism .avatar-box::after {
+    content: ""; position: absolute; inset: 5; border-radius: 50%;
+    background: linear-gradient(90deg, #FFA8B4 0%, #D1B3FF 100%);
+    mix-blend-mode: color; opacity: 0.5;
+    pointer-events: none; transition: opacity 0.25s ease;
+}
+body.theme-glassmorphism .member-row.active .avatar-box::after { 
+    opacity: 0.55; 
+    mix-blend-mode: soft-light;
+} 
+
 body.theme-spacial .bar-bg { 
     background-color: transparent !important; 
     background: transparent !important;       
@@ -423,13 +823,13 @@ body.theme-spacial .bar-bg {
 }
 
 body.theme-spacial .bar-fill { 
-    background-color: #282866 !important; /* Ciano Elétrico */
+    background-color: #282866 !important; 
     background: #282866 !important;      
     border: none !important;                  
-    height: 70% !important;                  
+    height: 90% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
-    box-shadow: 0 1px 0px 1px #141432 !important; /* Contorno Ciano Escuro */
+    box-shadow: 0 1px 0px 1px #141432 !important; 
 }
 
 body.theme-spacial .active .bar-fill { 
@@ -440,7 +840,23 @@ body.theme-spacial .active .bar-fill {
     box-shadow: 0 1px 0px 1px #005f73, 
                 0 0 20px #005f73,
                 0 0 20px #005f73,
-                0 0 20px #005f73 !important; /* Glow Rosa Cyberpunk */
+                0 0 20px #005f73 !important; 
+}
+
+    body.theme-spacial .mic-icon {
+    color: #282866 !important; 
+    filter: drop-shadow(0 0 1px #141432) !important; 
+}
+
+    body.theme-spacial .active .mic-icon {
+    color: #00F3FF !important;
+    filter: drop-shadow(0 0 2px #00F3FF) drop-shadow(0 0 5px #00F3FF) !important;
+}
+  
+
+body.theme-spacial .mic-icon.muted-active {
+    color: #282866 !important; 
+    filter: drop-shadow(0 0 2px #141432) drop-shadow(0 0 5px #141432) !important; 
 }
 
 body.theme-spacial .m-name,
@@ -454,7 +870,6 @@ body.theme-spacial .pct-display {
                   0.75px  0.75px 0 #141432 !important; 
 }
 
-/* Avatar Ativo */
 body.theme-spacial .active .m-avatar { 
     border-color: #00f3ff !important; 
     border-radius: 50% !important; 
@@ -463,10 +878,8 @@ body.theme-spacial .active .m-avatar {
 
 body.theme-spacial .active .m-name { color: #00f3ff !important; text-shadow: 0 0 20px #005f73 !important; }
 body.theme-spacial .active .time-display { color: #00f3ff !important; text-shadow: 0 0 12px #005f73 !important; }
+       
 
-       /* ==========================================================================
-   TEMA: Y2K RETRO (INSPIRADO)
-   ========================================================================== */
 body.theme-y2k .bar-bg { 
     background-color: transparent !important; 
     background: transparent !important;       
@@ -476,13 +889,13 @@ body.theme-y2k .bar-bg {
 }
 
 body.theme-y2k .bar-fill { 
-    background-color: #a3e635 !important; /* Verde Limão */
+    background-color: #a3e635 !important; 
     background: #a3e635 !important;      
     border: none !important;                  
-    height: 70% !important;                  
+    height: 90% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
-    box-shadow: 0 1px 0px 1px #3f6212 !important; /* Contorno Verde Escuro */
+    box-shadow: 0 1px 0px 1px #3f6212 !important; 
 }
 
 body.theme-y2k .active .bar-fill { 
@@ -493,7 +906,23 @@ body.theme-y2k .active .bar-fill {
     box-shadow: 0 1px 0px 1px #FFFFFF, 
                 0 0 20px #ffdd00,
                 0 0 20px #ffdd00,
-                0 0 20px #ffdd00 !important; /* Glow Roxo Pop */
+                0 0 20px #ffdd00 !important; 
+}
+
+    body.theme-y2k .mic-icon {
+    color: #A3E635 !important; 
+    filter: drop-shadow(0 0 1px #3F6212) !important; 
+}
+
+    body.theme-y2k .active .mic-icon {
+    color: #FFFF7F !important;
+    filter: drop-shadow(0 0 8px #ffdd00) drop-shadow(0 0 15px #ffdd00) !important;
+}
+  
+
+body.theme-y2k .mic-icon.muted-active {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(0 0 2px #A3E635) drop-shadow(0 0 5px #A3E635) !important; 
 }
 
 body.theme-y2k .m-name,
@@ -511,9 +940,6 @@ body.theme-y2k .active .m-avatar { border-color: #FFFc9e !important; box-shadow:
 body.theme-y2k .active .m-name { color: #FFFc9e !important; text-shadow: 0 0 15px #ffdd00 !important; }
 body.theme-y2k .active .time-display { color: #FFFc9e !important; text-shadow: 0 0 15px #ffdd00 !important; }
 
-       /* ==========================================================================
-   TEMA: DARK VELVET / GOLD (INSPIRADO)
-   ========================================================================== */
 body.theme-cream .bar-bg { 
     background-color: transparent !important; 
     background: transparent !important;       
@@ -523,13 +949,13 @@ body.theme-cream .bar-bg {
 }
 
 body.theme-cream .bar-fill { 
-    background-color: #f3e5ab !important; /* Dourado Champagne */
+    background-color: #f3e5ab !important; 
     background: #f3e5ab !important;      
     border: none !important;                  
-    height: 70% !important;                  
+    height: 90% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
-    box-shadow: 0 1px 0px 1px #5c4d24 !important; /* Contorno Marrom Luxo */
+    box-shadow: 0 1px 0px 1px #5c4d24 !important; 
 }
 
 body.theme-cream .active .bar-fill { 
@@ -540,7 +966,17 @@ body.theme-cream .active .bar-fill {
     box-shadow: 0 1px 0px 1px #FFFFFF, 
                 0 0 20px #d4af37,
                 0 0 20px #d4af37,
-                0 0 20px #d4af37 !important; /* Glow Dourado Real */
+                0 0 20px #d4af37 !important; 
+}
+
+    body.theme-cream .mic-icon {
+    color: #F3E5AB !important; 
+    filter: drop-shadow(0 0 1px #F3E5AB) !important; 
+}
+
+body.theme-cream .mic-icon.muted-active {
+    color: #D4AF37 !important; 
+    filter: drop-shadow(0 0 0px #F3E5AB) drop-shadow(0 0 0px #F3E5AB) !important; 
 }
 
 body.theme-cream .m-name,
@@ -559,9 +995,6 @@ body.theme-cream .active .m-name { color: #FFFFFF !important; text-shadow: 0 0 2
 body.theme-cream .active .time-display { color: #FFFFFF !important; text-shadow: 0 0 12px #d4af37 !important; }
 
 
-       /* ==========================================================================
-   TEMA: DARK FOREST (APENAS CORES)
-   ========================================================================== */
 body.theme-darkforest .bar-bg { 
     background-color: transparent !important; 
     background: transparent !important;       
@@ -571,13 +1004,13 @@ body.theme-darkforest .bar-bg {
 }
 
 body.theme-darkforest .bar-fill { 
-    background-color: #ab4400 !important; /* Verde Esmeralda escuro */
+    background-color: #ab4400 !important; 
     background: #ab4400 !important;      
     border: none !important;                  
-    height: 70% !important;                  
+    height: 90% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
-    box-shadow: 0 1px 0px 1px #702c02 !important; /* Contorno escuro terroso */
+    box-shadow: 0 1px 0px 1px #702c02 !important; 
 }
 
 body.theme-darkforest .active .bar-fill { 
@@ -588,14 +1021,31 @@ body.theme-darkforest .active .bar-fill {
     box-shadow: 0 1px 0px 1px #00ae0b, 
                 0 0 20px #007a08,
                 0 0 20px #007a08,
-                0 0 20px #007a08 !important; /* Glow Roxo Ametista */
+                0 0 20px #007a08 !important; 
+
+}      
+  body.theme-darkforest .mic-icon {
+    color: #ab4400 !important; 
+    filter: drop-shadow(0 0 1px #702c02) !important; 
+  }
+    
+
+body.theme-darkforest .active .mic-icon {
+    color: #00ae0b !important;
+    filter: drop-shadow(0 0 3px #007a08) drop-shadow(0 0 4px #00ae0b) !important;
+}
+  
+
+body.theme-darkforest .mic-icon.muted-active {
+    color: #702c02 !important; 
+    filter: drop-shadow(0 0 0px #702c02) drop-shadow(0 0 0px #702c02) !important; 
 }
 
 body.theme-darkforest .m-name,
 body.theme-darkforest .box-display,    
 body.theme-darkforest .time-display,
 body.theme-darkforest .pct-display {   
-    color: #ab4400 !important; /* Verde menta claro */
+    color: #ab4400 !important; 
     text-shadow: -0.5px -0.5px 0 #702c02,  
                   0.5px -0.5px 0 #702c02,
                  -0.5px  0.75px 0 #702c02,
@@ -607,9 +1057,6 @@ body.theme-darkforest .active .m-name { color: #00ae0b !important; text-shadow: 
 body.theme-darkforest .active .time-display { color: #00ae0b !important; text-shadow: 0 0 12px #00ae0b !important; }
 
        
-/* ==========================================================================
-   TEMA: MONO (FOTOGRAFIA P&B RETRÔ)
-   ========================================================================== */
 body.theme-mono .bar-bg { 
     background-color: transparent !important; 
     background: transparent !important;       
@@ -619,10 +1066,10 @@ body.theme-mono .bar-bg {
 }
 
 body.theme-mono .bar-fill { 
-    background-color: #444 !important; /* Cinza grafite fosco */
+    background-color: #444 !important; 
     background: #444 !important;      
     border: none !important;                  
-    height: 70% !important;                  
+    height: 90% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
     box-shadow: 0 1px 0px 1px #222 !important; 
@@ -635,7 +1082,23 @@ body.theme-mono .active .bar-fill {
     border-radius: 0px 6px 6px 0px !important;
     box-shadow: 0 1px 0px 1px #FFFFFF, 
                 0 0 15px #ffffff,
-                0 0 25px #ffffff !important; /* Brilho de flash de câmera */
+                0 0 25px #ffffff !important; 
+}
+body.theme-mono .mic-icon {
+    color: #444 !important; 
+    filter: drop-shadow(0 0 1px #444) !important; 
+    }
+
+
+body.theme-mono .active .mic-icon {
+    color: #FFFFFF !important;
+    filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 15px #fff) !important;
+}
+  
+
+body.theme-mono .mic-icon.muted-active {
+    color: #444 !important; 
+    filter: drop-shadow(0 0 0px #444) drop-shadow(0 0 0px #444) !important; 
 }
 
 body.theme-mono .m-name,
@@ -649,16 +1112,14 @@ body.theme-mono .pct-display {
                   0.75px  0.75px 0 #111 !important; 
 }
 
-/* Avatar Normal: Força a foto a ser redonda e se ajustar perfeitamente sem cortes bizarros */
 body.theme-mono .m-avatar {
     filter: grayscale(100%) contrast(110%) !important;
-    border-radius: 50% !important; /* Sempre redondo */
+    border-radius: 50% !important; 
 }
 
-/* Quando Canta: Só ativa a cor e o brilho */
 body.theme-mono .member-row.active .m-avatar { 
     filter: grayscale(0%) contrast(100%) !important; 
-    border-color: #ffffff !important; /* Ativa a borda branca */
+    border-color: #ffffff !important; 
     box-shadow: 0 0 20px #ffffff, 0 0 35px rgba(255, 255, 255, 0.5) !important; 
 }
 
@@ -673,9 +1134,6 @@ body.theme-mono .active .time-display {
     text-shadow: 0 0 12px #ffffff !important; 
 }
        
-/* ==========================================================================
-   TEMA: VAPORWAVE (EFEITO NÉVOA/VAPOR NEON)
-   ========================================================================== */
 body.theme-vaporwave .bar-bg { 
     background-color: transparent !important; 
     background: transparent !important;       
@@ -688,19 +1146,17 @@ body.theme-vaporwave .bar-fill {
     background-color: #8f8f8f !important; 
     background: #8f8f8f !important;      
     border: none !important;                  
-    height: 70% !important;                  
+    height: 90% !important;                  
     position: relative;
     border-radius: 0px 6px 6px 0px !important;
     box-shadow: 0 1px 0px 1px #4f4f4f !important; 
 }
 
-/* Quando ATIVA: O brilho aumenta o "blur" (desfoque) para parecer fumaça se espalhando */
 body.theme-vaporwave .active .bar-fill { 
     background-color: #FFFFFF !important; 
     background: #FFFFFF !important;
     border: none !important; 
     border-radius: 0px 6px 6px 0px !important;
-    /* Note o aumento dos pixels de desfoque (30px e 45px) para espalhar como névoa */
     box-shadow: 0 1px 0px 1px #FFFFFF, 
                 0 0 15px #e100ff,
                 0 0 30px #9b51e0,
@@ -717,20 +1173,18 @@ body.theme-vaporwave .pct-display {
                  -0.5px  0.75px 0 #4f4f4f,
                   0.75px  0.75px 0 #4f4f4f !important; 
 }
-       /* Avatar Normal: Fica desfocado, como se estivesse atrás de um vidro com vapor */
 body.theme-vaporwave .m-avatar {
     border: 5px solid #4f4f4f !important;
     border-radius: 20% !important;
-    filter: blur(3px) !important; /* Aplica o efeito de névoa/vapor na foto */
-    transition: filter 0.3s ease, border-color 0.3s ease !important; /* Transição suave */
+    filter: blur(3px) !important; 
+    transition: filter 0.3s ease, border-color 0.3s ease !important; 
 }
 
-/* Quando Canta: O vapor some e a foto ganha nitidez total com a aura neon */
 body.theme-vaporwave .active .m-avatar { 
     border-color: #FFFFFF !important; 
     border: 5px solid #FFFFFF; 
     border-radius: 20% !important; 
-    filter: blur(0px) !important; /* Foto 100% nítida instantaneamente */
+    filter: blur(0px) !important; 
     box-shadow: 0 0 15px #e100ff, 0 0 35px rgba(225, 0, 255, 0.5) !important; 
 }
 
@@ -746,34 +1200,79 @@ body.theme-vaporwave .active .time-display {
 
 
        
-body.theme-glitch .bar-bg { background: transparent !important; border: none !important; box-shadow: none !important; overflow: visible !important; }
+body.theme-glitch .bar-bg {
+    background: transparent !important; 
+    border: none !important; 
+    box-shadow: none !important; 
+    overflow: visible !important; 
+}
 body.theme-glitch .bar-fill { 
     background-color: #00ffff !important; 
-    height: 70% !important; position: relative; border-radius: 0px 20px 0px !important;
-    box-shadow: 3px 3px 0px #ff0055 !important; /* Sombra seca estilo glitch */
+    height: 80% !important; position: relative; border-radius: 0px 20px 0px !important;
+    box-shadow: 3px 3px 0px #ff0055 !important; 
 }
 body.theme-glitch .active .bar-fill { 
     background-color: #ffffff !important; border-radius: 0px 20px 20px 0px !important;
-    /* Camadas de cores desalinhadas simulando bug de tela */
-    box-shadow: -4px 0px 0px #00ffff, 4px 0px 0px #ff0055, 0 2px 10px rgba(255,255,255,0.5) !important; 
+    box-shadow: -4px 4px 0px #00ffff, 4px -4px 0px #ff0055, 0 -3px 10px rgba(255,255,255,0.5) !important; 
 }
-body.theme-glitch .m-name, body.theme-glitch .box-display, body.theme-glitch .time-display, body.theme-glitch .pct-display {   
+
+body.theme-glitch .mic-icon {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(-3 3 4px #00ffff) drop-shadow(3 -3 4px #ff0055) !important; 
+    }
+
+
+body.theme-glitch .active .mic-icon {
+    color: #FFFFFF !important;
+    filter: drop-shadow(-5 5 6px #00ffff) drop-shadow(5 -5 6px #ff0055) !important;
+}
+  
+
+body.theme-glitch .mic-icon.muted-active {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(-4 4 5px #00ffff) drop-shadow(4 -4 5px #ff0055) !important; 
+}
+    
+body.theme-glitch .m-name, 
+body.theme-glitch .box-display, 
+body.theme-glitch .time-display, 
+body.theme-glitch .pct-display {   
     color: #ffffff !important;
     text-shadow: 2px 2px 0px #ff0055, -1px -1px 0px #00ffff !important;
 }
 body.theme-glitch .active .m-avatar { 
-    border: 3px solid #ff0055 !important; 
-    border-radius: 50% !important; /* Deixa redondo de novo */
-    box-shadow: -3px 3px 0px #00ffff !important; 
+    border: 6px solid #ff0055 !important; 
+    border-radius: 50% !important; 
+    scale: 1.15;
+    box-sizing: content-box;
+    box-shadow: -1.15px 2px 0px #00ffff !important; 
 }
 
-body.theme-glitch .active .m-name { color: #ffffff !important; text-shadow: 3px 3px 0px #ff0055, -2px -2px 0px #00ffff !important; }
+body.theme-glitch .m-avatar {
+    filter: drop-shadow(2px 0 0 rgba(255,0,85,0.7)) drop-shadow(-2px 0 0 rgba(0,255,255,0.7));
+    scale: 1.0; 
+    transition: filter 0.1s ease;
+}
+body.theme-glitch .member-row.active .m-avatar {
+    animation: glitchJitter 0.3s infinite steps(2, jump-start) !important;
+    
+    /* 1. O drop-shadow original que você usou */
+    filter: drop-shadow(4px 0 0 rgba(255,0,85,0.9)) drop-shadow(-4px 0 0 rgba(0,255,255,0.9)) contrast(1.2) !important; }
+    
 
-/* ==========================================================================
+@keyframes glitchJitter {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-2px, 1px); }
+    50%  { transform: translate(2px, -1px); }
+    75%  { transform: translate(-1px, -1px); }
+    100% { transform: translate(0, 0); }
+}
+body.theme-glitch .active .m-name { 
+    color: #ffffff !important; 
+    text-shadow: 3px 3px 0px #ff0055, -2px -2px 0px #00ffff !important; 
+}
 
-/* ==========================================================================
-   TEMA: COMIC CARTOON RETRÔ (PRETO E BRANCO)
-   ========================================================================== */
+       
 body.theme-comic .bar-bg { 
     background: transparent !important; 
     border: none !important; 
@@ -781,17 +1280,15 @@ body.theme-comic .bar-bg {
     overflow: visible !important; 
 }
        
-/* Barra Normal: Fundo cinza claro estilo papel de gibi com borda de nanquim */
 body.theme-comic .bar-fill { 
     background-color: #cccccc !important; 
-    height: 70% !important; 
+    height: 80% !important; 
     position: relative; 
     border-radius: 0px 20px 20px 0px !important;
-    border: 1px solid #777 !important; /* Contorno grosso de caneta */
-    box-shadow: 4px 4px 0px #000000 !important; /* Sombra de bloco preta */
+    border: 1px solid #777 !important; 
+    box-shadow: 4px 4px 0px #000000 !important; 
 }
 
-/* Quando ATIVA: A barra acende em Branco Puro e a sombra salta ainda mais */
 body.theme-comic .active .bar-fill { 
     background-color: #ffffff !important; 
     border: 3px solid #fff !important;
@@ -799,7 +1296,23 @@ body.theme-comic .active .bar-fill {
     box-shadow: 0px 4px 1px #777 !important; 
 }
 
-/* Textos: Estilo onomatopeia com contorno total e sombra de tinta preta */
+body.theme-comic .mic-icon {
+    color: #FFFFFF !important; 
+    filter: drop-shadow(0 0 4px #777) !important; 
+    }
+
+
+body.theme-comic .active .mic-icon {
+    color: #FFFFFF !important;
+    filter: drop-shadow(0 0 2px #777) drop-shadow(0 0 5px #777) !important;
+}
+  
+
+body.theme-comic .mic-icon.muted-active {
+    color: #cccccc !important; 
+    filter: drop-shadow(0 0 5px #111) drop-shadow(0 0 5px #111) !important; 
+}
+
 body.theme-comic .m-name, 
 body.theme-comic .box-display, 
 body.theme-comic .time-display, 
@@ -807,7 +1320,7 @@ body.theme-comic .pct-display {
     color: #777 !important;
     font-weight: 900 !important;
     letter-spacing: 1px !important;
-    text-transform: uppercase !important; /* Letras maiúsculas de quadrinhos */
+    text-transform: uppercase !important; 
     text-shadow: 2.5px 2.5px 0px #000000, -1px -1px 0px #000000, 1px -1px 0px #000000, -1px 1px 0px #000000 !important;
 }
 
@@ -815,23 +1328,26 @@ body.theme-comic .active .time-display {
        color: #FFFFFF !important; 
        text-shadow: 3px #fff !important; 
 }
-       
-/* Avatar Normal: Foto em 100% Preto e Branco com contorno e sombra de desenho */
-body.theme-comic .m-avatar {
-    filter: grayscale(100%) contrast(120%) !important; /* Transforma a foto em desenho P&B */
-    border: 3px solid #000000 !important;
-    border-radius: 50% !important;
-    box-shadow: 4px 4px 0px #000000 !important;
-    transition: all 0.0s ease !important;
-}
 
-/* Quando ATIVA: O avatar salta para fora com uma sombra seca branca e contorno forte */
+
+
 body.theme-comic .active .m-avatar { 
-    filter: grayscale(100%) contrast(140%) !important; /* Aumenta o impacto do desenho */
+    filter: grayscale(100%) contrast(140%) !important;
     border: 3px solid #000 !important; 
     border-radius: 50% !important; 
-    box-shadow: 5px 5px 0px #ffffff, 8px 8px 0px #777 !important; /* Sombra dupla (Branca + Preta) */
+    box-shadow: 5px 5px 0px #ffffff, 8px 8px 0px #777 !important;
+    transition: filter 0.05s ease, box-shadow 0.05s ease !important;
+    transition-delay: 0.095s !important; /* delay de 0.1s pra ATIVAR */
 }
+
+       body.theme-comic .m-avatar {
+    filter: grayscale(100%) contrast(150%) saturate(0%) !important;
+    transition: filter 0.55s ease !important;
+}
+       body.theme-comic .member-row.active .m-avatar {
+    filter: grayscale(70%) contrast(140%) saturate(0%) brightness(1.25) !important;
+}
+
 
 body.theme-comic .active .m-name { 
     color: #ffffff !important; 
@@ -855,7 +1371,7 @@ body.theme-stealth .bar-bg {
 /* A barra de progresso vira um feixe de plasma líquido correndo dentro do sulco */
 body.theme-stealth .bar-fill { 
     background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4)) !important; 
-    height: 70% !important;                  
+    height: 85% !important;                  
     position: relative;
     border-radius: 0px 20px 20px 0px !important;
     box-shadow: none !important; 
@@ -926,7 +1442,7 @@ body.theme-chroma .bar-bg {
 /* A barra de progresso em repouso (plasma neutro) */
 body.theme-chroma .bar-fill { 
     background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3)) !important; 
-    height: 70% !important;                  
+    height: 80% !important;                  
     position: relative;
     border-radius: 0px 20px 20px 0px !important;
     box-shadow: none !important; 
@@ -991,8 +1507,8 @@ body.theme-chroma .active .m-avatar {
 /* A canaleta vira um bloco sólido com borda marcada e sombra estilo pop art */
 body.theme-glass .bar-bg { 
     background: #000 !important; /* Fundo branco para destacar no painel preto */
-    border: 3px solid #1a1a1a !important; /* Borda de quadrinhos bem grossa */
-    box-shadow: 3px 3px 0px #1a1a1a !important; /* Sombra sólida e sem desfoque */
+    border: 3px solid color-mix(in srgb, var(--m-color) 30%, #000 70%) !important;
+    box-shadow: 3px 3px 0px #1a1a1a; 
     overflow: hidden !important; 
     height: 13px !important; /* Bem grossa e marcante */
     border-radius: 0px 20px 20px 0px !important; /* Cantos arredondados estilo chiclete */
@@ -1000,8 +1516,8 @@ body.theme-glass .bar-bg {
 
 /* A barra de progresso em repouso (vazia) */
 body.theme-glass .bar-fill { 
-    background: #888 !important; /* Cinza claro bem limpo */
-    height: 70% !important;                  
+    background: color-mix(in srgb, var(--m-color) 30%, #000 70%) !important; 
+    height: 80% !important;                  
     border-radius: 0px 20px 20px 0px !important;
     box-shadow: none !important; 
     transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Efeito "bounce" elástico ao encher */
@@ -1010,7 +1526,7 @@ body.theme-glass .bar-fill {
 /* Quando ATIVA: Enche com a cor da integrante em tom pastel/sólido vibrante */
 body.theme-glass .active .bar-fill { 
     background: var(--m-color) !important; 
-    border-right: 3px solid #fff !important; /* Divisor marcado na ponta da barra */
+    border-right: 3px solid color-mix(in srgb, var(--m-color) 30%, #fff 70%) !important; 
 }
 
 /* Textos em Alta Definição e Estilo Revista/Cartoon */
@@ -1018,7 +1534,7 @@ body.theme-glass .m-name,
 body.theme-glass .box-display,    
 body.theme-glass .time-display,
 body.theme-glass .pct-display {   
-    color: #888 !important;
+    color: color-mix(in srgb, var(--m-color) 30%, #000 70%) !important; 
     font-weight: 900 !important; /* Texto super grosso */
     letter-spacing: 1px !important;
     text-transform: uppercase !important;
@@ -1027,7 +1543,7 @@ body.theme-glass .pct-display {
 
 /* Quando ATIVA: O texto ganha uma sombra colorida marcante */
 body.theme-glass .active .m-name { 
-    color: #fff !important; 
+    color: color-mix(in srgb, var(--m-color) 30%, #ffffff 70%) !important; 
     text-shadow: 1.5px 2px 4px var(--m-color) !important; /* Sombra em bloco na cor da integrante */
 }
 
@@ -1040,7 +1556,7 @@ body.theme-glass .active .pct-display {
 
 /* O Avatar Normal: Estilo adesivo com borda preta grossa */
 body.theme-glass .m-avatar { 
-    border: 3px solid #1a1a1a !important;
+    border: 3px solid color-mix(in srgb, var(--m-color) 30%, #000 70%) !important;
     border-radius: 50% !important; 
     box-shadow: 4px 4px 0px #888 transparent !important; /* Sombra sólida deslocada */
     display: inline-block !important; 
@@ -1050,7 +1566,7 @@ body.theme-glass .m-avatar {
 
 /* Quando ATIVA: O avatar pula levemente para a frente e ganha a borda colorida */
 body.theme-glass .active .m-avatar {
-    border-color: #1a1a1a !important; 
+    border-color: color-mix(in srgb, var(--m-color) 30%, #000 70%) !important; 
     border-radius: 50% !important; 
     transform: scale(1.08) translate(-2px, -2px) !important; /* Dá um leve "zoom" físico na integrante ativa */
     box-shadow: 5px 5px 0px var(--m-color), 5px 5px 0px 3px #1a1a1a !important; /* Sombra dupla colorida estilo Y2K */
@@ -1070,34 +1586,35 @@ body.theme-glass .active .m-avatar {
             width: 100%; height: 100%; border-radius: 1px; pointer-events: none;
         }
         .hex-text-in {
-            background: transparent; border: none; color: #fff; font-weight: 900; font-size: 13px; width: 75px; outline: none; font-family: monospace; text-transform: uppercase;
+            background: transparent; border: none; color: #9f67ff; font-weight: 900; font-size: 13px; width: 75px; outline: none; font-family: monospace; text-transform: uppercase;
         }
 
         body.font-segoe, body.font-segoe * { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif !important; }
-        body.font-poppins, body.font-poppins * { font-family: 'Poppins', sans-serif !important; }
-        body.font-montserrat, body.font-montserrat * { font-family: 'Montserrat', sans-serif !important; }
-        body.font-bebas, body.font-bebas * { font-family: 'Bebas Neue', sans-serif !important; font-weight: normal !important; }
-        body.font-oswald, body.font-oswald * { font-family: 'Oswald', sans-serif !important; }
-        body.font-orbitron, body.font-orbitron * { font-family: 'Orbitron', sans-serif !important; }
-        body.font-rubik, body.font-rubik * { font-family: 'Rubik Mono One', monospace !important; font-weight: normal !important; }
-        body.font-quicksand, body.font-quicksand * { font-family: 'Quicksand', sans-serif !important; }
-        body.font-fredoka, body.font-fredoka * { font-family: 'Fredoka', sans-serif !important; }
-        body.font-inter, body.font-inter * { font-family: 'Inter', sans-serif !important; }
-
+body.font-poppins, body.font-poppins * { font-family: 'Poppins', sans-serif !important; }
+body.font-montserrat, body.font-montserrat * { font-family: 'Montserrat', sans-serif !important; }
+body.font-roboto, body.font-roboto * { font-family: 'Roboto', sans-serif !important; }
+body.font-bebas, body.font-bebas * { font-family: 'Bebas Neue', sans-serif !important; font-weight: normal !important; }
+body.font-oswald, body.font-oswald * { font-family: 'Oswald', sans-serif !important; }
+body.font-orbitron, body.font-orbitron * { font-family: 'Orbitron', sans-serif !important; }
+body.font-rubik, body.font-rubik * { font-family: 'Rubik Mono One', monospace !important; font-weight: normal !important; }
+body.font-quicksand, body.font-quicksand * { font-family: 'Quicksand', sans-serif !important; }
+body.font-fredoka, body.font-fredoka * { font-family: 'Fredoka', sans-serif !important; }
+body.font-inter, body.font-inter * { font-family: 'Inter', sans-serif !important; }
+    
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .engine-box {
             background: #0d0d0d; border: 1px solid #1a1a1a; padding: 25px; border-radius: 8px; width: 90%; max-width: 420px; box-sizing: border-box; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.7);
         }
-        .engine-box h1, .engine-box h2 { color: #adff2f; font-size: 15px; letter-spacing: 2px; margin: 0 0 20px 0; font-weight: 900; }
+        .engine-box h1, .engine-box h2 { color: #6100ff; font-size: 15px; letter-spacing: 2px; margin: 0 0 20px 0; font-weight: 900; }
         .setup-input { background: #141414; border: 1px solid #252525; color: #fff; padding: 12px; border-radius: 6px; font-weight: 900; font-size: 12px; margin: 6px 0; outline: none; width: 100%; box-sizing: border-box; text-align: center; }
-        .go { background: #adff2f; color: #000; padding: 14px; width: 100%; border: none; font-weight: 900; font-size: 12px; letter-spacing: 1px; margin-top: 15px; border-radius: 6px; cursor: pointer; }
+        .go { background: #6100ff; color: #000; padding: 14px; width: 100%; border: none; font-weight: 900; font-size: 12px; letter-spacing: 1px; margin-top: 15px; border-radius: 6px; cursor: pointer; }
 
         .dock { 
             position: relative; width: 100%; max-width: 750px; padding: 10px; background: #000; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid #111; box-sizing: border-box; z-index: 1000; flex-shrink: 0; margin: 0 auto; transition: transform 0.4s ease, opacity 0.3s ease;
         }
         .dock.dock-hidden { transform: translateY(110%); opacity: 0; pointer-events: none; position: absolute; }
         #restore-dock-trigger {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 12px; background: rgba(173, 255, 47, 0.2); border-radius: 4px 4px 0 0; z-index: 9999; cursor: pointer; display: none; text-align: center; font-size: 8px; color: #adff2f; line-height: 12px;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 12px; background: rgba(97, 0, 255, 0.2); border-radius: 4px 4px 0 0; z-index: 9999; cursor: pointer; display: none; text-align: center; font-size: 8px; color: #6100ff; line-height: 12px;
         }
 
         .dock-row { display: flex; gap: 6px; width: 100%; }
@@ -1105,19 +1622,19 @@ body.theme-glass .active .m-avatar {
             flex: 1; padding: 10px 4px; background: #0d0d0d; color: #fff; border: 1px solid #1a1a1a; font-size: 9px; letter-spacing: 0.5px; border-radius: 5px; font-weight: 900; text-align: center; white-space: nowrap; cursor: pointer;
         }
         #sort-btn { width: 35% !important; flex: none !important; }
-        .btn-toggle-on { border-color: #adff2f !important; color: #adff2f !important; }
+        .btn-toggle-on { border-color: #6100ff !important; color: #6100ff !important; }
 
         .size-control-container { display: flex; align-items: center; background: #0d0d0d; border: 1px solid #1a1a1a; padding: 6px 12px; border-radius: 5px; gap: 12px; width: 100%; box-sizing: border-box; }
-        .size-control-container span { font-size: 9px; color: #adff2f; letter-spacing: 0.5px; white-space: nowrap; }
-        .size-slider { flex: 1; accent-color: #adff2f; cursor: pointer; height: 4px; }
+        .size-control-container span { font-size: 9px; color: #6100ff; letter-spacing: 0.5px; white-space: nowrap; }
+        .size-slider { flex: 1; accent-color: #6100ff; cursor: pointer; height: 4px; }
 
-        .photo-btn { display: block; background: #1a1a1a; border: 1px solid #2d2d2d; color: #adff2f; font-size: 10px; padding: 8px; border-radius: 5px; cursor: pointer; text-align: center; margin-top: 5px; }
+        .photo-btn { display: block; background: #1a1a1a; border: 1px solid #2d2d2d; color: #6100ff; font-size: 10px; padding: 8px; border-radius: 5px; cursor: pointer; text-align: center; margin-top: 5px; }
 
         .vid-controls {
             position: relative; width: 100%; max-width: 750px; margin: 0 auto; padding: 6px; background: #050505; display: none; gap: 4px; border-top: 1px solid #111; box-sizing: border-box; z-index: 999; justify-content: center; flex-shrink: 0;
         }
         .v-btn { flex: 1; max-width: 70px; padding: 6px 0; background: #0d0d0d; color: #888; border: 1px solid #1a1a1a; font-size: 8px; border-radius: 4px; font-weight: 900; text-align: center; cursor: pointer; }
-        .v-play-active { color: #adff2f !important; border-color: #adff2f !important; }
+        .v-play-active { color: #6100ff !important; border-color: #6100ff !important; }
 
         #vocal-tap-panels-container { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; padding: 5px 0; }
         .vocal-member-panel { flex: 1; min-width: calc(25% - 5px); background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 5px; padding: 15px 4px; text-align: center; cursor: pointer; }
@@ -1136,6 +1653,9 @@ body.theme-glass .active .m-avatar {
         .hide-circle .avatar-wrap { width: 0px !important; height: 0px !important; opacity: 0 !important; margin-right: 0px !important; }
         
         .member-input-card { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; background: #141414; padding: 8px; border-radius: 6px; border: 1px solid #222; }
+
+
+
     </style>
 </head>
 <body class="theme-orange">
@@ -1184,23 +1704,23 @@ body.theme-glass .active .m-avatar {
             <div class="dock-row" id="dock-row-1">
                 <button class="btn btn-toggle-on" id="sort-btn" onclick="toggleSort(event)">AUTO-SORT: ON</button>
                 <button class="btn" onclick="resetTimers(event)">RESET</button>
-                <button class="btn" onclick="wipeAll(event)" style="color: #ff4444;">REWORK</button>
+                <button class="btn" onclick="wipeAll(event)" style="color: #7a000e;">REWORK</button>
                 <button class="btn" id="vid-btn" onclick="triggerVideo(event)">MP4</button>
             </div>
             <div class="dock-row" id="dock-row-2">
                 <button class="btn" id="max-btn" onclick="toggleMax(event)">MAX TIME: 0.0</button>
                 <button class="btn" id="font-btn" onclick="openFonts(event)">FONTS</button>
-                <button class="btn" id="save-btn" onclick="openSaveManager(event)" style="color:#adff2f; border-color:#2a2a2a;">SAVE GROUP</button>
+                <button class="btn" id="save-btn" onclick="openSaveManager(event)" style="color:#6100ff; border-color:#2a2a2a;">SAVE GROUP</button>
             </div>
             
             <div class="dock-row" id="dock-row-3">
                 <button class="btn" id="sdv-btn" onclick="togglePieChart(event)">DISPLAY SDV: OFF</button>
                 <button class="btn" id="vocal-panel-toggle-btn" onclick="toggleVocalPanels(event)" style="flex: 1.3;">VOCAL TAP PANELS</button>
-                <button class="btn" onclick="backToGroupsMenu(event)" style="color: #ffb703; border-color: #333; flex: 0.7;">➔ VOLTAR</button>
+                <button class="btn" onclick="backToGroupsMenu(event)" style="color: #7a000e; border-color: #333; flex: 0.7;">➔ VOLTAR</button>
             </div>
             
             <div class="dock-row" id="dock-row-4">
-                <button class="btn" id="speed-btn" onclick="cycleSpeed(event)" style="color: #00E5FF;">SPEED: 1.0X</button>
+                <button class="btn" id="speed-btn" onclick="cycleSpeed(event)" style="color: #D000FF;">SPEED: 1.0X</button>
                 <button class="btn" id="theme-btn" onclick="cycleStyles(event)" style="color: #D000FF;">STYLE: ORANGE</button>
                 <button class="btn" onclick="hideDockPanel(event)" style="color: #aaa; background: #111;">HIDE DOCK</button>
             </div>
@@ -1213,16 +1733,19 @@ body.theme-glass .active .m-avatar {
     <div id="setup" class="overlay">
         <div class="engine-box" id="step1">
             <h1>LINE DISTRIBUTION</h1>
-            <div style="color: #666; font-size: 9px; margin-bottom: 12px; letter-spacing: 1px;">GERENCIADOR DE CONFIGURAÇÕES</div>
-            <div style="font-size: 11px; margin-bottom: 5px; color: #aaa;">CRIAR NOVO GRUPO</div>
+            <div style="color: #5c497d; font-size: 9px; margin-bottom: 12px; letter-spacing: 1px;">GERENCIADOR DE CONFIGURAÇÕES</div>
+            <div style="font-size: 11px; margin-bottom: 5px; color: #bca3e8;">CRIAR NOVO GRUPO</div>
             <input type="number" id="count" value="6" class="setup-input">
             <button class="go" onclick="nextStep()">PROSSEGUIR CONFIGURAÇÃO</button>
             
             <div style="border-top: 1px solid #1a1a1a; margin-top: 25px; padding-top: 15px;">
-              <button class="go" onclick="makeCombinedLine()" style="background:#FFD700; margin-top:8px;">FAZER LINE</button>
-                <div style="font-size: 10px; color: #adff2f; text-align: left; margin-bottom: 10px; letter-spacing: 0.5px;">GRUPOS SALVOS:</div>
+              <button class="go" onclick="makeCombinedLine()" style="background:#D000FF; margin-top:8px;">FAZER LINE</button>
+                <div style="font-size: 10px; color: #7d31ff; text-align: left; margin-bottom: 10px; letter-spacing: 0.5px;">GRUPOS SALVOS:</div>
                 <div id="main-saved-list" style="max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;"></div>
             </div>
+          <button class="sm-header-btn" style="color:#00E5FF; border-color:#00E5FF;" onclick="exportGroups()"> EXPORTAR BACKUP</button>
+<input type="file" accept=".json" id="import-file" style="display:none;" onchange="importGroups(this)">
+<button class="sm-header-btn" style="color:#D000FF; border-color:#D000FF;" onclick="document.getElementById('import-file').click()"> IMPORTAR BACKUP</button>
         </div>
 
         <div class="engine-box hidden" id="step2">
@@ -1238,6 +1761,7 @@ body.theme-glass .active .m-avatar {
             <div style="display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto; padding-right:4px;">
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Segoe UI')">Segoe UI</button>
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Poppins')">Poppins</button>
+                <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Roboto')">Roboto</button>
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Montserrat')">Montserrat</button>
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Bebas')">Bebas Neue</button>
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Oswald')">Oswald</button>
@@ -1246,6 +1770,7 @@ body.theme-glass .active .m-avatar {
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Inter')">Inter</button>
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Orbitron')">Orbitron</button>
                 <button class="go" style="margin:0; padding:10px;" onclick="selectFont('Rubik')">Rubik Block</button>
+                
             </div>
             <button class="sm-header-btn" style="margin-top:15px; width:100%; border-color:#ff4444; color:#ff4444;" onclick="closeFonts()">CANCEL</button>
         </div>
@@ -1264,7 +1789,7 @@ body.theme-glass .active .m-avatar {
         <div class="engine-box">
             <div class="save-manager-header">
                 <button class="sm-header-btn" id="sm-delete-toggle" onclick="toggleSaveDeleteMode()" style="color:#ff4444;">EXCLUIR</button>
-                <span style="font-size:11px; color:#adff2f;">GERENCIAR</span>
+                <span style="font-size:11px; color:#6100ff;">GERENCIAR</span>
                 <button class="sm-header-btn" onclick="closeSaveManager()">FECHAR</button>
             </div>
             <div class="save-list-container" id="save-list-target"></div>
@@ -1276,7 +1801,7 @@ body.theme-glass .active .m-avatar {
             <h2 id="custom-edit-title">NOVO TEMPO</h2>
             <input type="number" step="0.1" id="custom-edit-input" class="setup-input" inputmode="decimal">
             <button class="go" onclick="saveCustomEditTime()">CONFIRMAR</button>
-            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#adff2f; color:#adff2f;" onclick="closeCustomEditTime()">➔ VOLTAR PARA OS GRUPOS</button>
+            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#6100ff; color:#6100ff;" onclick="closeCustomEditTime()">➔ VOLTAR PARA OS GRUPOS</button>
         </div>
     </div>
 
@@ -1285,7 +1810,7 @@ body.theme-glass .active .m-avatar {
             <h2>SET MAX TIME</h2>
             <input type="number" step="0.1" id="custom-max-input" class="setup-input" inputmode="decimal">
             <button class="go" onclick="saveCustomMaxTime()">CONFIRMAR</button>
-            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#adff2f; color:#adff2f;" onclick="closeCustomMaxTime()">➔ VOLTAR PARA OS GRUPOS</button>
+            <button class="sm-header-btn" style="margin-top:10px; width:100%; border-color:#6100ff; color:#6100ff;" onclick="closeCustomMaxTime()">➔ VOLTAR PARA OS GRUPOS</button>
         </div>
     </div>
 
@@ -1298,7 +1823,7 @@ body.theme-glass .active .m-avatar {
     let manualMax = 0; 
     let showMax = false;
     let saveDeleteMode = false;
-    let currentLineHeight = 54; 
+    let currentLineHeight = 70; 
     let vocalPanelsMode = false;
     let showPieChart = false;
     let currentEditingMemberId = null;
@@ -1306,9 +1831,9 @@ body.theme-glass .active .m-avatar {
     let currentSpeed = 1.0;
     const speedOptions = [1.0, 0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 3.0, 4.0, 5.0, 6.25, 7.5, 8.75, 10];
     let currentThemeIndex = 0;
-    const themes = [ "orange", "cream", "icon", "cyberneon", "spacial", "glitch", "comic", "m-color", "neon", "cyberpunk", "glow", "classic", "pink", "glassmorphism", "y2k", "mono", "vaporwave","darkforest", "stealth", "chroma", "glass"];
+    const themes = [ "orange", "gray", "yellow", "cream", "icon", "cyberneon", "spacial", "glitch", "comic", "m-color", "neon", "cyberpunk", "glow", "classic", "pink", "glassmorphism", "y2k", "mono", "vaporwave","darkforest", "stealth", "chroma", "glass"];
 
-    const crystalColors = ["#adff2f", "#00E5FF", "#D000FF", "#FF0055", "#00FF66", "#FFDD00", "#0066FF"];
+    const crystalColors = ["#6100ff", "#00E5FF", "#D000FF", "#FF0055", "#00FF66", "#FFDD00", "#0066FF"];
 
     window.addEventListener('load', () => { renderMainSetupSaves(); });
 
@@ -1373,7 +1898,7 @@ body.theme-glass .active .m-avatar {
     }
 
     function selectFont(fontName) {
-        document.body.classList.remove('font-segoe', 'font-poppins', 'font-montserrat', 'font-bebas', 'font-oswald', 'font-orbitron', 'font-rubik', 'font-quicksand', 'font-fredoka', 'font-inter');
+        document.body.classList.remove('font-segoe', 'font-poppins', 'font-montserrat', 'font-roboto','font-bebas', 'font-oswald', 'font-orbitron', 'font-rubik', 'font-quicksand', 'font-fredoka', 'font-inter');
         document.body.classList.add(`font-${fontName.toLowerCase()}`);
         closeFonts();
     }
@@ -1513,14 +2038,14 @@ body.theme-glass .active .m-avatar {
         target.innerHTML = arrayData.map((item, index) => `
             <div style="background:#141414; border:1px solid #222; padding:8px 12px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
                 <div style="flex:1; min-width:0; margin-right:8px;">
-                    <div style="font-size:11px; color:#fff; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.title}</div>
-                    <div style="font-size:8px; color:#666;">INTEGRANTES: ${item.members.length}</div>
+                    <div style="font-size:11px; color:#9f67ff; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.title}</div>
+                    <div style="font-size:8px; color:#5c497d;">INTEGRANTES: ${item.members.length}</div>
                 </div>
                 <div style="display:flex; gap:5px; flex-shrink:0;">
-                    <button onclick="deleteGroupFromMainInterface(${index})" style="background:#ff4444; border:none; color:#fff; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">EXCLUIR ✖</button>
-                    <button onclick="editSavedGroup(${index})" style="background:#00E5FF; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">EDITAR ⚙️</button>
-                    <button onclick="loadSavedGroupDirectly(${index})" style="background:#adff2f; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">CARREGAR ➔</button>
-                    <button onclick="toggleLineGroup(${index}, this)" style="background:#FFD700; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;"> ⭐️ </button>
+                    <button onclick="deleteGroupFromMainInterface(${index})" style="background:#7a000e; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">EXCLUIR X</button>
+                    <button onclick="editSavedGroup(${index})" style="background:#D000FF; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">EDITAR ✎</button>
+                    <button onclick="loadSavedGroupDirectly(${index})" style="background:#6100ff; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;">CARREGAR ➔</button>
+                    <button onclick="toggleLineGroup(${index}, this)" style="background:#D000FF; border:none; color:#000; font-weight:900; font-size:9px; padding:5px 8px; border-radius:3px; cursor:pointer;"> ☆ </button>
                 </div>
             </div>
         `).join('');
@@ -1536,7 +2061,7 @@ body.theme-glass .active .m-avatar {
                     <span style="font-size:11px; color:#fff; display:block;">${item.title}</span>
                     <span style="font-size:8px; color:#555;">MEMBERS: ${item.members.length}</span>
                 </div>
-                <span style="color:${saveDeleteMode ? '#ff4444':'#adff2f'}; font-size:10px;">${saveDeleteMode ? '[DELETAR]':'➔'}</span>
+                <span style="color:${saveDeleteMode ? '#ff4444':'#6100ff'}; font-size:10px;">${saveDeleteMode ? '[DELETAR]':'➔'}</span>
             </div>
         `).join('');
     }
@@ -1616,7 +2141,7 @@ body.theme-glass .active .m-avatar {
                         sourceHeight = imgNode.width; sourceY = (imgNode.height - imgNode.width) / 2;
                     }
                     ctx.drawImage(imgNode, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, 120, 120);
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    const compressedBase64 = canvas.toDataURL('image/png', 0.7);
                     input.setAttribute('data-img-src', compressedBase64); 
                     input.previousElementSibling.innerText = "✓ PHOTO ADDED"; 
                 };
@@ -1779,51 +2304,72 @@ body.theme-glass .active .m-avatar {
     }
 
     function buildViewportDOM() {
-        document.getElementById('viewport').innerHTML = members.map(m => `
-            <div class="member-row" id="row-${m.id}" onpointerdown="tgl(${m.id})" style="--m-color: ${m.color}">
-                <div class="avatar-wrap">
-                    <div class="m-avatar" id="avatar-${m.id}" style="background-image: url('${m.img}')"></div>
-                    <span class="mic-icon" id="mic-${m.id}" onpointerdown="muteTgl(event, ${m.id})">➕️</span>
+    document.getElementById('viewport').innerHTML = members.map(m => `
+        <div class="member-row" id="row-${m.id}" onpointerdown="tgl(${m.id})" style="--m-color: ${m.color}">
+            <div class="avatar-wrap">
+                <div class="avatar-box" style="--c: ${m.color}">
+                    <img class="m-avatar" id="avatar-${m.id}" src="${m.img}">
                 </div>
-                <div class="content-wrap">
-                    <div class="label-group">
-                        <div class="label-row">
-                            <span class="m-name" id="name-${m.id}">${m.name}</span>
-                            <div class="time-display" id="disp-${m.id}">
-                                <span id="box-${m.id}" style="padding: 2px 4px;">0.0</span>
-                                <span class="m-pct" id="pct-${m.id}">0.0%</span>
-                                <button class="edit-trigger-btn" onpointerdown="triggerEditTime(event, ${m.id})">⚙️</button>
-                            </div>
+                
+                <svg class="mic-icon" id="mic-${m.id}" onpointerdown="muteTgl(event, ${m.id})" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor" />
+                    <path d="M12 17c2.76 0 5-2.24 5-5h1.5c0 3.25-2.42 5.93-5.5 6.42V21h3v1.5h-8V21h3v-2.58C7.92 17.93 5.5 15.25 5.5 12H7c0 2.76 2.24 5 5 5z" fill="currentColor" />
+                </svg>
+            </div>
+            <div class="content-wrap">
+                <div class="label-group">
+                    <div class="label-row">
+                        <span class="m-name" id="name-${m.id}">${m.name}</span>
+                        <div class="time-display" id="disp-${m.id}">
+                            <span id="box-${m.id}" style="padding: 2px 4px;">0.0</span>
+                            <span class="m-pct" id="pct-${m.id}">0.0%</span>
+                            <button class="edit-trigger-btn" onpointerdown="triggerEditTime(event, ${m.id})">⚙</button>
                         </div>
                     </div>
-                    <div class="bar-bg">
-                        <div class="bar-fill" id="bar-${m.id}" style="background-color: ${m.color};"></div>
-                    </div>
+                </div>
+                <div class="bar-bg">
+                    <div class="bar-fill" id="bar-${m.id}" style="background-color: ${m.color};"></div>
                 </div>
             </div>
-        `).join('');
-    }
+        </div>
+    `).join('');
+}
+
+
+
 
     function triggerEditTime(e, id) {
-        e.stopPropagation(); e.preventDefault();
-        let m = members.find(x => x.id === id);
-        if (!m) return;
-        currentEditingMemberId = id;
-        document.getElementById('custom-edit-title').innerText = `EDITAR TEMPO DE ${m.name}`;
-        document.getElementById('custom-edit-input').value = m.time.toFixed(1);
-        document.getElementById('custom-edit-modal').classList.remove('hidden');
-    }
+    e.stopPropagation(); e.preventDefault();
+    let m = members.find(x => x.id === id);
+    if (!m) return;
+    currentEditingMemberId = id;
+    document.getElementById('custom-edit-title').innerText = `EDITAR TEMPO DE ${m.name}`;
+    // Alterado de .toFixed(1) para .toFixed(3)
+    document.getElementById('custom-edit-input').value = m.time.toFixed(3);
+    document.getElementById('custom-edit-modal').classList.remove('hidden');
+}
 
-    function saveCustomEditTime() {
-        if (currentEditingMemberId !== null) {
-            let m = members.find(x => x.id === currentEditingMemberId);
-            if (m) {
-                let val = parseFloat(document.getElementById('custom-edit-input').value);
-                if (!isNaN(val) && val >= 0) m.time = val;
+
+function saveCustomEditTime() {
+    if (currentEditingMemberId !== null) {
+        let m = members.find(x => x.id === currentEditingMemberId);
+        if (m) {
+            let val = parseFloat(document.getElementById('custom-edit-input').value);
+            if (!isNaN(val) && val >= 0) {
+                m.time = val;
+                
+                // Atualiza o texto visual imediatamente para 3 casas decimais (0.000) ao salvar
+                let box = document.getElementById(`box-${m.id}`);
+                if (box) {
+                    box.innerText = m.time.toFixed(2);
+                }
             }
         }
-        closeCustomEditTime();
     }
+    closeCustomEditTime();
+}
+
+    
     function closeCustomEditTime() { document.getElementById('custom-edit-modal').classList.add('hidden'); currentEditingMemberId = null; }
 
     function startEngine() {
@@ -1857,44 +2403,86 @@ body.theme-glass .active .m-avatar {
         lastTime = performance.now(); loop();
     }
 
-    function tgl(id) {
-        let m = members.find(x => x.id === id);
-        if (!m || m.muted) return;
-        m.active = !m.active;
-        const rowNode = document.getElementById(`row-${id}`);
-        if(rowNode) rowNode.classList.toggle('active', m.active);
-        if (vocalPanelsMode) { 
-            const panelNode = document.getElementById(`vp-panel-${id}`);
-            if(panelNode) panelNode.classList.toggle('vp-active', m.active);
-        }
+function tgl(id) {
+    let m = members.find(x => x.id === id);
+    if (!m || m.muted) return;
+    m.active = !m.active;
+    const rowNode = document.getElementById(`row-${id}`);
+    if(rowNode) rowNode.classList.toggle('active', m.active);
+    if (vocalPanelsMode) { 
+        const panelNode = document.getElementById(`vp-panel-${id}`);
+        if(panelNode) panelNode.classList.toggle('vp-active', m.active);
     }
+}
 
-    function muteTgl(e, id) {
+function muteTgl(e, id) {
     if (e) {
-        e.stopPropagation(); // Já está no seu código (evita subir o clique)
-        e.preventDefault();  // ADICIONE ISSO AQUI! (bloqueia a abertura de links/sites)
+        e.stopPropagation(); 
+        e.preventDefault();  
     }
     
     let m = members.find(x => x.id === id);
     if (!m) return;
     
     m.muted = !m.muted;
-    // ... restante do seu código continua igual ...
 
-        const row = document.getElementById('row-' + id);
-        const mic = document.getElementById('mic-' + id);
+    const row = document.getElementById('row-' + id);
+    const mic = document.getElementById('mic-' + id);
+    
+    if (row) {
         row.classList.toggle('is-muted', m.muted);
-        mic.innerHTML = m.muted ? "➖️" : "➕️"; 
-        if (m.muted) { m.active = false; row.classList.remove('active'); }
-        if(vocalPanelsMode) { const panelNode = document.getElementById(`vp-panel-${id}`); if(panelNode) panelNode.classList.remove('vp-active'); }
     }
+    
+    if (mic) {
+        if (m.muted) {
+            mic.classList.add('muted-active');
+            // SVG redesenhado do zero com base na imagem (perfeitamente limpo e reto)
+            mic.innerHTML = `
+                <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor" />
+                <path d="M12 17c2.76 0 5-2.24 5-5h1.5c0 3.25-2.42 5.93-5.5 6.42V21h3v1.5h-8V21h3v-2.58C7.92 17.93 5.5 15.25 5.5 12H7c0 2.76 2.24 5 5 5z" fill="currentColor" />
+                <line x1="3.5" y1="20.5" x2="20.5" y2="3.5" stroke="black" stroke-width="2.5" />
+                <line x1="3.5" y1="20.5" x2="20.5" y2="3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            `;
+        } else {
+            mic.classList.remove('muted-active');
+            // Microfone padrão reestruturado para ser idêntico à base do mutado
+            mic.innerHTML = `
+                <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor" />
+                <path d="M12 17c2.76 0 5-2.24 5-5h1.5c0 3.25-2.42 5.93-5.5 6.42V21h3v1.5h-8V21h3v-2.58C7.92 17.93 5.5 15.25 5.5 12H7c0 2.76 2.24 5 5 5z" fill="currentColor" />
+            `;
+        }
+    }
+    
+    if (m.muted) { 
+        m.active = false; 
+        if(row) row.classList.remove('active'); 
+    }
+    
+    if (vocalPanelsMode) { 
+        const panelNode = document.getElementById(`vp-panel-${id}`); 
+        if(panelNode) panelNode.classList.remove('vp-active'); 
+    }
+}
 
-    function resetTimers(e) {
-        if(e) e.preventDefault();
-        members.forEach(m => { m.time = 0; m.active = false; m.muted = false; const mic = document.getElementById(`mic-${m.id}`); if(mic) mic.innerHTML = "➕️"; });
-        document.querySelectorAll('.member-row').forEach(r => r.classList.remove('active', 'is-muted'));
-        if(vocalPanelsMode) buildVocalPanelsDOM();
-    }
+
+function resetTimers(e) {
+    if(e) e.preventDefault();
+    members.forEach(m => { 
+        m.time = 0; 
+        m.active = false; 
+        m.muted = false; 
+        
+        const mic = document.getElementById(`mic-${m.id}`); 
+        if(mic) {
+            mic.classList.remove('muted-active');
+            // Restaura o ícone original ligado
+            mic.innerHTML = `<path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 3-2.54 5.1-5.64 4.42C9.4 15.02 8 13.06 8 11H6c0 3.11 2.34 5.75 5.34 6.22V20H8c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1h-3.34v-2.78c3-.47 5.34-3.11 5.34-6.22h-2z"/>`;
+        }
+    });
+    document.querySelectorAll('.member-row').forEach(r => r.classList.remove('active', 'is-muted'));
+    if(vocalPanelsMode) buildVocalPanelsDOM();
+}
+
 
     function wipeAll(e) {
         if(e) e.preventDefault();
@@ -1956,8 +2544,40 @@ body.theme-glass .active .m-avatar {
         ctx.closePath();
         ctx.fillStyle = "#000000"; // Cor preta idêntica ao fundo da tela
         ctx.fill();
+
+          ctx.imageSmoothingEnabled = true;
+ctx.imageSmoothingQuality = "high";
+          ctx.save();
+ctx.beginPath();
+ctx.arc(65, 65, 60, 0, Math.PI * 2);
+ctx.closePath();
+ctx.restore();
     }
 
+    function setupPieCanvas() {
+    const canvas = document.getElementById('pieChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const size = 130;
+
+    // força tamanho visual fixo
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+
+    // tamanho real
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+
+    // 🔥 RESET TOTAL (IMPORTANTE)
+    ctx.resetTransform();
+
+    // desenha em coordenada limpa
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+        // ... (Mantenha todo o resto do seu script igual lá em cima)
 
     function loop() {
         let now = performance.now();
@@ -1971,9 +2591,17 @@ body.theme-glass .active .m-avatar {
             const canvas = document.getElementById('pieChart');
             if (canvas) {
                 const ctx = canvas.getContext('2d');
-                let dpr = window.devicePixelRatio || 1;
-                if(canvas.width !== 130 * dpr) { canvas.width = 130 * dpr; canvas.height = 130 * dpr; ctx.scale(dpr, dpr); }
-                drawPieChart(ctx, 65, 65, 60, total);
+                const size = 130;
+                const dpr = (window.devicePixelRatio * (window.visualViewport?.scale || 1.5)) *2;
+
+                if (canvas.width !== size * dpr) {
+                    canvas.width = size * dpr;
+                    canvas.height = size * dpr;
+                }
+
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+                drawPieChart(ctx, size / 2, size / 2, 60, total);
             }
         }
 
@@ -1997,14 +2625,59 @@ body.theme-glass .active .m-avatar {
             } else {
                 barFill.style.opacity = "1";
             }
-            
+
+            // AJUSTE AQUI: Define a posição vertical
             r.style.transform = `translate3d(0, ${(autoSort ? i : m.id) * currentLineHeight}px, 0)`;
+            
+            // SOLUÇÃO DO BUG: Dá prioridade de z-index para quem está em primeiro no ranking
+            // e prioridade extra se a integrante estiver ativa cantando.
+            let baseZIndex = displayOrder.length - i; 
+            if (m.active) {
+                r.style.zIndex = baseZIndex + 100; // Joga pra frente de tudo se estiver ativa
+            } else {
+                r.style.zIndex = baseZIndex; // Mantém a ordem do ranking correta
+            }
         });
         activeLoop = requestAnimationFrame(loop);
     }
 
+    // ... (Mantenha o resto das funções de baixo igual)
+
+    function exportGroups() {
+    let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+    let arrayData = rawData ? JSON.parse(rawData) : [];
+    let blob = new Blob([JSON.stringify(arrayData, null, 2)], { type: 'application/json' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `line-distribution-backup-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importGroups(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            let imported = JSON.parse(e.target.result);
+            let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
+            let current = rawData ? JSON.parse(rawData) : [];
+            let merged = [...current, ...imported]; // ou substitui, se preferir
+            localStorage.setItem('KPOP_LINE_SAVED_GROUPS', JSON.stringify(merged));
+            renderMainSetupSaves();
+            alert("GRUPOS IMPORTADOS COM SUCESSO!");
+        } catch (err) {
+            alert("ARQUIVO INVÁLIDO");
+        }
+    };
+    reader.readAsText(file);
+  }
+
+
     function makeCombinedLine() {
-        if(selectedLineGroups.length === 0) { alert("SELECIONE PELO MENOS 1 GRUPO ⭐️"); return; }
+        if(selectedLineGroups.length === 0) { alert("SELECIONE PELO MENOS 1 GRUPO ☆"); return; }
         let rawData = localStorage.getItem('KPOP_LINE_SAVED_GROUPS');
         let arrayData = rawData ? JSON.parse(rawData) : [];
         let combinedMembers = [];
@@ -2030,7 +2703,8 @@ body.theme-glass .active .m-avatar {
         buildViewportDOM(); updateLineSizes(currentLineHeight);
         lastTime = performance.now(); loop();
         selectedLineGroups = [];
-    }
+      }
+
     </script>
 </body>
 </html>
